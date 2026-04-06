@@ -1,0 +1,250 @@
+const express = require('express');
+const Shop = require('../models/Shop');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
+const upload = require('../middleware/upload');
+
+const router = express.Router();
+
+// GET /api/shops/search — Geo-search for shops near a location
+// Query: ?lat=28.6&lng=77.2&service=ac-repair&radius=15&page=1
+router.get('/search', async (req, res) => {
+  try {
+    const { lat, lng, service, radius = 15, page = 1 } = req.query;
+    const limit = 12;
+    const skip = (parseInt(page) - 1) * limit;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ success: false, error: 'Latitude and longitude are required' });
+    }
+
+    const query = {
+      isApproved: true,
+      isActive: true,
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [parseFloat(lng), parseFloat(lat)]
+          },
+          $maxDistance: parseInt(radius) * 1000 // Convert km to meters
+        }
+      }
+    };
+
+    if (service && service !== 'all') {
+      query.services = { $in: [service] };
+    }
+
+    const shops = await Shop.find(query)
+      .select('-password')
+      .skip(skip)
+      .limit(limit);
+
+    // Calculate distance for each shop
+    const userLat = parseFloat(lat);
+    const userLng = parseFloat(lng);
+
+    const shopsWithDistance = shops.map(shop => {
+      const shopObj = shop.toObject();
+      const [shopLng, shopLat] = shop.location.coordinates;
+      shopObj.distance = haversineDistance(userLat, userLng, shopLat, shopLng);
+      return shopObj;
+    });
+
+    const total = await Shop.countDocuments(query);
+
+    res.json({
+      success: true,
+      shops: shopsWithDistance,
+      pagination: {
+        page: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        total
+      }
+    });
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ success: false, error: 'Server error during search' });
+  }
+});
+
+// GET /api/shops — List all approved shops (with optional filters)
+router.get('/', async (req, res) => {
+  try {
+    const { service, city, page = 1 } = req.query;
+    const limit = 20;
+    const skip = (parseInt(page) - 1) * limit;
+
+    const query = { isApproved: true, isActive: true };
+
+    if (service && service !== 'all') {
+      query.services = { $in: [service] };
+    }
+    if (city) {
+      query['address.city'] = new RegExp(city, 'i');
+    }
+
+    const shops = await Shop.find(query)
+      .select('-password')
+      .sort({ rating: -1, totalReviews: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Shop.countDocuments(query);
+
+    res.json({
+      success: true,
+      shops,
+      pagination: {
+        page: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        total
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/me — Get logged-in shop's full profile
+router.get('/me', protect, async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.shopId).select('-password');
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+    res.json({ success: true, shop });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// PUT /api/shops/me — Update logged-in shop's profile
+router.put('/me', protect, async (req, res) => {
+  try {
+    const allowedFields = [
+      'businessName', 'ownerName', 'phone', 'whatsappNumber',
+      'services', 'address', 'description', 'openingHours'
+    ];
+
+    const updates = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    // Handle location update separately
+    if (req.body.longitude && req.body.latitude) {
+      updates.location = {
+        type: 'Point',
+        coordinates: [parseFloat(req.body.longitude), parseFloat(req.body.latitude)]
+      };
+    }
+
+    const shop = await Shop.findByIdAndUpdate(req.shopId, updates, {
+      new: true,
+      runValidators: true
+    }).select('-password');
+
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    res.json({ success: true, shop, message: 'Profile updated successfully' });
+  } catch (error) {
+    console.error('Update error:', error);
+    res.status(500).json({ success: false, error: 'Server error during update' });
+  }
+});
+
+// POST /api/shops/me/upload — Upload profile or gallery images
+router.post('/me/upload', protect, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image file provided' });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+    const { imageType } = req.body; // 'profile' or 'gallery'
+
+    const shop = await Shop.findById(req.shopId);
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    if (imageType === 'gallery') {
+      shop.galleryImages.push(imageUrl);
+    } else {
+      shop.profileImage = imageUrl;
+    }
+
+    await shop.save();
+
+    res.json({
+      success: true,
+      imageUrl,
+      message: `${imageType === 'gallery' ? 'Gallery' : 'Profile'} image uploaded successfully`
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ success: false, error: 'Server error during upload' });
+  }
+});
+
+// GET /api/shops/:id — Get single shop's public profile
+router.get('/:id', async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id).select('-password');
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+    res.json({ success: true, shop });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// --- ADMIN ROUTES ---
+
+// PUT /api/shops/:id/approve — Admin approve/reject a shop
+router.put('/:id/approve', adminOnly, async (req, res) => {
+  try {
+    const { approved } = req.body;
+    const shop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { isApproved: approved !== false },
+      { new: true }
+    ).select('-password');
+
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    res.json({
+      success: true,
+      shop,
+      message: `Shop ${shop.isApproved ? 'approved' : 'rejected'} successfully`
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/admin/pending — List pending shops (admin)
+router.get('/admin/pending', adminOnly, async (req, res) => {
+  try {
+    const shops = await Shop.find({ isApproved: false })
+      .select('-password')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, shops });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+
+// Haversine formula to calculate distance between two coordinates (in km)
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10; // Round to 1 decimal
+}
+
+module.exports = router;

@@ -1,0 +1,131 @@
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const Shop = require('../models/Shop');
+const { JWT_SECRET, protect } = require('../middleware/authMiddleware');
+
+const router = express.Router();
+
+// POST /api/auth/register — Register a new shop
+router.post('/register', async (req, res) => {
+  try {
+    const {
+      businessName, ownerName, email, password, phone, whatsappNumber,
+      services, address, longitude, latitude, description, openingHours
+    } = req.body;
+
+    // Validation
+    if (!businessName || !ownerName || !email || !password || !phone) {
+      return res.status(400).json({ success: false, error: 'Please fill all required fields' });
+    }
+
+    if (!longitude || !latitude) {
+      return res.status(400).json({ success: false, error: 'Location coordinates are required' });
+    }
+
+    if (!services || services.length === 0) {
+      return res.status(400).json({ success: false, error: 'Please select at least one service' });
+    }
+
+    // Check if email already registered
+    const existing = await Shop.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ success: false, error: 'A shop with this email already exists' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create shop
+    const shop = new Shop({
+      businessName,
+      ownerName,
+      email,
+      password: hashedPassword,
+      phone,
+      whatsappNumber: whatsappNumber || phone,
+      services,
+      address: address || {},
+      location: {
+        type: 'Point',
+        coordinates: [parseFloat(longitude), parseFloat(latitude)]
+      },
+      description: description || '',
+      openingHours: openingHours || 'Mon-Sat 8AM-8PM',
+      isApproved: false // Requires admin approval
+    });
+
+    await shop.save();
+
+    // Generate JWT
+    const token = jwt.sign({ id: shop._id }, JWT_SECRET, { expiresIn: '30d' });
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! Your shop is pending admin approval.',
+      token,
+      shop: {
+        id: shop._id,
+        businessName: shop.businessName,
+        email: shop.email,
+        isApproved: shop.isApproved
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ success: false, error: 'Server error during registration' });
+  }
+});
+
+// POST /api/auth/login — Login shop owner
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Please provide email and password' });
+    }
+
+    const shop = await Shop.findOne({ email });
+    if (!shop) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    }
+
+    const isMatch = await bcrypt.compare(password, shop.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ id: shop._id }, JWT_SECRET, { expiresIn: '30d' });
+
+    res.status(200).json({
+      success: true,
+      token,
+      shop: {
+        id: shop._id,
+        businessName: shop.businessName,
+        email: shop.email,
+        isApproved: shop.isApproved
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, error: 'Server error during login' });
+  }
+});
+
+// GET /api/auth/me — Get logged-in shop details
+router.get('/me', protect, async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.shopId).select('-password');
+    if (!shop) {
+      return res.status(404).json({ success: false, error: 'Shop not found' });
+    }
+    res.json({ success: true, shop });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+module.exports = router;
