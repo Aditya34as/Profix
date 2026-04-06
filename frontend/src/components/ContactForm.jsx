@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const PLACEHOLDERS = {
   'ac-repair': 'Describe your issue (e.g. AC is blowing warm air, not cooling)...',
   'plumbing': 'Describe your issue (e.g. kitchen tap is leaking, low water pressure)...',
   'water-heater': 'Describe your issue (e.g. geyser not heating, water too hot)...',
 };
 
-const ContactForm = ({ defaultService = 'ac-repair' }) => {
+const ContactForm = ({ defaultService = 'ac-repair', shopId = null }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -21,12 +23,29 @@ const ContactForm = ({ defaultService = 'ac-repair' }) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const submitPromise = fetch('http://localhost:5000/api/contact', {
+    // Build payload with optional shopId and location
+    const payload = { ...formData };
+    if (shopId) payload.shopId = shopId;
+
+    // Try to get customer location
+    if (navigator.geolocation) {
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        payload.latitude = pos.coords.latitude;
+        payload.longitude = pos.coords.longitude;
+      } catch {
+        // Location optional, continue without it
+      }
+    }
+
+    const submitPromise = fetch(`${API_URL}/api/contact`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(payload),
     }).then(async (res) => {
       const data = await res.json();
       if (!data.success) {
@@ -36,12 +55,12 @@ const ContactForm = ({ defaultService = 'ac-repair' }) => {
     });
 
     toast.promise(submitPromise, {
-      loading: 'Dispatching technician...',
+      loading: 'Sending your request...',
       success: () => {
         setFormData({ name: '', phone: '', serviceRequested: defaultService, message: '' });
-        return 'Message received! We will dispatch a technician shortly.';
+        return 'Request sent! The service provider will contact you shortly.';
       },
-      error: 'Error submitting form. Please call us directly.',
+      error: 'Error submitting form. Please call directly.',
     });
     
     submitPromise.catch(console.error).finally(() => setIsSubmitting(false));
@@ -49,7 +68,9 @@ const ContactForm = ({ defaultService = 'ac-repair' }) => {
 
   return (
     <div className="glass-card" style={styles.card}>
-      <h3 style={styles.heading}>Request Immediate Service</h3>
+      <h3 style={styles.heading}>
+        {shopId ? 'Send Service Request' : 'Request Immediate Service'}
+      </h3>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input 
           type="text" 
@@ -81,6 +102,11 @@ const ContactForm = ({ defaultService = 'ac-repair' }) => {
           <option value="ac-repair">AC Repair</option>
           <option value="plumbing">Plumbing</option>
           <option value="water-heater">Water Heater / Geyser</option>
+          <option value="electrical">Electrical</option>
+          <option value="carpentry">Carpentry</option>
+          <option value="painting">Painting</option>
+          <option value="cleaning">Cleaning</option>
+          <option value="pest-control">Pest Control</option>
         </select>
         <textarea 
           placeholder={PLACEHOLDERS[formData.serviceRequested] || PLACEHOLDERS['ac-repair']}
@@ -93,7 +119,7 @@ const ContactForm = ({ defaultService = 'ac-repair' }) => {
         ></textarea>
         
         <button type="submit" className="btn-secondary" style={styles.button} disabled={isSubmitting} id="contact-submit">
-          {isSubmitting ? 'Dispatching...' : 'Dispatch Technician'}
+          {isSubmitting ? 'Sending...' : 'Send Request'}
         </button>
       </form>
     </div>

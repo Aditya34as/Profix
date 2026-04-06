@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Store } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -9,7 +10,8 @@ const Footer = () => {
           <div style={styles.col}>
             <div style={styles.logo}>PRO FIX</div>
             <p style={styles.footerText}>
-              Delhi NCR's trusted choice for premium plumbing and HVAC repair services. Fast, honest, and certified experts.
+              India's trusted platform connecting customers with verified local home service providers. 
+              Find the nearest experts for AC repair, plumbing, and more.
             </p>
             <p style={styles.footerContact}>
                Helpline: <strong>+91 98765 43210</strong><br />
@@ -18,33 +20,34 @@ const Footer = () => {
           </div>
 
           <div style={styles.col}>
-            <h4 style={styles.colTitle}>Services</h4>
+            <h4 style={styles.colTitle}>For Customers</h4>
             <ul style={styles.linkList}>
-              <li><Link to="/services/plumbing">Emergency Plumbing</Link></li>
-              <li><span style={{color: 'var(--color-outline)'}}>Water Tank Cleaning</span></li>
-              <li><Link to="/services/ac-repair">Split & Window AC Repair</Link></li>
-              <li><span style={{color: 'var(--color-outline)'}}>Geyser Installation</span></li>
+              <li><Link to="/find-services">Find Services Near Me</Link></li>
+              <li><Link to="/find-services?service=ac-repair">AC Repair</Link></li>
+              <li><Link to="/find-services?service=plumbing">Plumbing</Link></li>
+              <li><Link to="/find-services?service=water-heater">Geyser / Water Heater</Link></li>
+              <li><Link to="/find-services?service=electrical">Electrical</Link></li>
             </ul>
           </div>
 
           <div style={styles.col}>
+            <h4 style={styles.colTitle}>For Businesses</h4>
+            <ul style={styles.linkList}>
+              <li><Link to="/register">Register Your Business</Link></li>
+              <li><Link to="/login">Shop Owner Login</Link></li>
+              <li><Link to="/dashboard">Business Dashboard</Link></li>
+            </ul>
             <div style={styles.seoAreaBox}>
-              <h4 style={styles.colTitle}>NCR Areas Served</h4>
-              <p style={styles.footerText}>
-                 We provide rapid 90-minute response dispatch to key neighborhoods including:
-              </p>
-              <ul style={styles.linkList}>
-                <li><span style={{color: 'var(--color-outline-variant)'}}>South Delhi (GK, Def Col)</span></li>
-                <li><span style={{color: 'var(--color-outline-variant)'}}>Gurgaon (DLF Phase 1-5)</span></li>
-                <li><span style={{color: 'var(--color-outline-variant)'}}>Noida (Sector 15-62)</span></li>
-                <li><span style={{color: 'var(--color-outline-variant)'}}>Vasant Kunj & Dwarka</span></li>
-              </ul>
+              <Store size={18} color="var(--color-primary-container)" />
+              <span style={{fontSize: '0.85rem', color: 'var(--color-outline-variant)'}}>
+                Free registration — Join 100s of local service businesses
+              </span>
             </div>
           </div>
           
         </div>
         <div style={styles.footerBottom}>
-          <p>© {new Date().getFullYear()} Pro Fix India Plumbers & HVAC. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Pro Fix India — Local Services Marketplace. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -88,14 +91,17 @@ const styles = {
   linkList: {
     listStyle: 'none',
     padding: 0,
-    margin: 0,
+    margin: '0 0 24px 0',
     display: 'flex',
     flexDirection: 'column',
     gap: '12px'
   },
   seoAreaBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
     backgroundColor: 'rgba(255,255,255,0.05)',
-    padding: '32px',
+    padding: '16px',
     borderRadius: '12px',
     border: '1px solid rgba(255,255,255,0.1)'
   },

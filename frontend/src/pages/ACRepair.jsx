@@ -1,6 +1,7 @@
 import SEO from '../components/SEO';
 import ContactForm from '../components/ContactForm';
 import AnnouncementBar from '../components/AnnouncementBar';
+import NearbyShops from '../components/NearbyShops';
 import { Phone, CheckCircle, Shield, Clock } from 'lucide-react';
 
 const acServiceSchema = {
@@ -137,6 +138,13 @@ const ACRepair = () => {
               <p style={styles.reviewer}>- Sameer S., DLF Phase 3, Gurgaon</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Nearby AC Repair Shops */}
+      <section style={{ backgroundColor: 'var(--color-surface)', padding: '0 0 20px' }}>
+        <div className="container">
+          <NearbyShops service="ac-repair" title="AC Repair Shops Near You" limit={3} />
         </div>
       </section>
       

@@ -530,4 +530,42 @@ html, body {
   .alert-banner p {
     font-size: 0.8rem !important;
   }
+
+  /* Register page — stack to single column */
+  .register-grid,
+  .find-services-search {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* === NEW: Shop Card hover on desktop === */
+.shop-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 30, 80, 0.1);
+}
+
+/* === NEW: Dashboard grid responsive === */
+@media (max-width: 900px) {
+  /* Stack dashboard grid */
+  div[style*="grid-template-columns: 380px 1fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Stack shop profile layout */
+  div[style*="grid-template-columns: 1fr 380px"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Register form layout */
+  div[style*="grid-template-columns: 1fr 1.2fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Register info side shouldn't be sticky on mobile */
+  div[style*="position: sticky"][style*="top: 120px"] {
+    position: static !important;
+  }
 }

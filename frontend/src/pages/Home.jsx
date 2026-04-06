@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
-import { Settings, Wrench, ThermometerSnowflake, CheckCircle, ChevronDown, ShieldCheck } from 'lucide-react';
+import { Settings, Wrench, ThermometerSnowflake, CheckCircle, ChevronDown, ShieldCheck, Search, MapPin, Store, ArrowRight, Users, Zap } from 'lucide-react';
 
 const Home = () => {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -12,29 +12,37 @@ const Home = () => {
 
   const faqs = [
     {
-      q: "Do you charge a visiting fee in Delhi NCR?",
-      a: "Yes, we charge a nominal ₹299 visiting fee to cover travel. However, if you proceed with the repair work, this fee is completely waived off or adjusted into the final bill."
+      q: "How do I find a service provider near me?",
+      a: "Simply click 'Find Services', allow location access, and we'll show you verified local businesses sorted by distance from your location."
     },
     {
-      q: "Do you provide a warranty on your AC gas filling?",
-      a: "Absolutely. We provide a 90-day warranty on all AC gas refilling services and a 30-day warranty on regular service tasks. If the same issue occurs, we fix it for free."
+      q: "How can I list my business on Pro Fix?",
+      a: "Click 'List Your Business' in the navbar, fill out the registration form with your shop details and location, and submit for admin review. Once approved, customers near you will be able to find you!"
     },
     {
-      q: "Are your technicians verified and experienced?",
-      a: "Yes. Every Pro Fix technician goes through a strict background verification and rigorous skill assessment. All our senior technicians have a minimum of 5 years of field experience in HVAC and Plumbing."
+      q: "Is it free to register my business?",
+      a: "Yes, registration is completely free. We want to help local service businesses grow by connecting them with customers who need their expertise."
     },
     {
-      q: "What areas do you cover in NCR?",
-      a: "We actively serve all of South Delhi, Gurgaon (up to Sector 60), Faridabad, and Noida. Emergency dispatch is available in these zones within 90 minutes."
+      q: "How does the location-based search work?",
+      a: "When a customer searches for services, we use their browser location (with permission) to find registered shops within their chosen radius. Results are sorted by distance, so the nearest providers show up first."
+    },
+    {
+      q: "Do you verify the service providers?",
+      a: "Yes. Every new registration goes through an admin review process. Only businesses that pass our verification are listed for customers."
+    },
+    {
+      q: "What areas do you cover?",
+      a: "Pro Fix is available across India. Any local service business can register, and customers from any location can search for providers near them."
     }
   ];
 
   return (
     <>
       <SEO 
-        title="Plumber & AC Repair Delhi NCR" 
-        description="Top-rated plumbers and AC repair technicians in Delhi NCR. Pro Fix offers 24/7 service, upfront pricing, and guaranteed satisfaction."
-        keywords="Plumber Delhi NCR, AC Repair Gurgaon, Noida HVAC contractors, emergency plumbing India"
+        title="Pro Fix — Find Trusted Local Service Providers Near You" 
+        description="Discover verified AC repair, plumbing, and home service experts near your location. Local businesses register to reach more customers."
+        keywords="local services near me, AC repair near me, plumber near me, home services India, service marketplace"
       />
       
       {/* Hero Section */}
@@ -42,18 +50,19 @@ const Home = () => {
         <div style={styles.heroOverlay}></div>
         <div className="container" style={styles.heroContainer}>
           <div className="animate-fade-in-up" style={styles.heroGlassContent}>
-            <span style={styles.eyebrow}>Serving Delhi, Gurgaon & Noida</span>
-            <h1 style={styles.heading1}>The Architectural Standard in <span className="text-gradient"> Plumbing & AC Repair</span></h1>
+            <span style={styles.eyebrow}>Your Local Service Marketplace</span>
+            <h1 style={styles.heading1}>Find Trusted <span className="text-gradient">Service Experts</span> Near You</h1>
             <p style={styles.heroText}>
-              We deliver precision, expertise, and dependability. No generic contractor tricks. Just premium, 5-star service for your home's most critical systems.
+              AC repair, plumbing, electrical & more — discover verified local businesses ready to serve you. 
+              Geo-tagged search finds the nearest providers instantly.
             </p>
             <div style={styles.heroActions}>
-              <Link to="/services/ac-repair" className="btn-secondary" style={styles.primaryLink}>
-                Book AC Service
+              <Link to="/find-services" className="btn-secondary" style={styles.primaryLink}>
+                <Search size={20} /> Find Services Near Me
               </Link>
-              <a href="tel:+919876543210" style={styles.secondaryLink}>
-                Call us: +91 98765 43210
-              </a>
+              <Link to="/register" style={styles.secondaryLink}>
+                <Store size={18} /> List Your Business →
+              </Link>
             </div>
           </div>
         </div>
@@ -63,52 +72,98 @@ const Home = () => {
       <section style={styles.servicesSection}>
         <div className="container">
           <div className="animate-fade-in-up">
-            <h2 style={{...styles.heading2, textAlign: 'center'}}>Expert Solutions for the Indian Climate</h2>
+            <h2 style={{...styles.heading2, textAlign: 'center'}}>Popular Service Categories</h2>
             <div style={styles.servicesGrid}>
-              <div className="glass-card" style={styles.serviceCard}>
+              <Link to="/find-services?service=ac-repair" className="glass-card" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><ThermometerSnowflake size={32} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>AC & Cooling</h3>
-                 <p style={styles.serviceText}>Complete Split/Window AC installations, seasonal servicing, gas charging, and emergency repair when temperatures hit 45°C.</p>
-                 <Link to="/services/ac-repair" style={styles.serviceLink}>Explore AC Repair →</Link>
-              </div>
-              <div className="glass-card" style={styles.serviceCard}>
+                 <p style={styles.serviceText}>Find nearby AC repair, installation, and servicing experts. Split, window, and central AC specialists.</p>
+                 <span style={styles.serviceLink}>Find AC Experts <ArrowRight size={16} /></span>
+              </Link>
+              <Link to="/find-services?service=plumbing" className="glass-card" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><Wrench size={32} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>Plumbing Services</h3>
-                 <p style={styles.serviceText}>From simple pipe leaks to full motor repairs and water tank cleaning, our master plumbers handle issues cleanly.</p>
-                 <Link to="/services/plumbing" style={styles.serviceLink}>Explore Plumbing →</Link>
-              </div>
-               <div className="glass-card" style={styles.serviceCard}>
+                 <p style={styles.serviceText}>Emergency plumbers near you for leaks, blockages, motor repairs, and pipe replacement.</p>
+                 <span style={styles.serviceLink}>Find Plumbers <ArrowRight size={16} /></span>
+              </Link>
+               <Link to="/find-services?service=water-heater" className="glass-card" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><Settings size={32} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>Geysers & Water Heaters</h3>
-                 <p style={styles.serviceText}>Instant heating upgrades and emergency replacements so your family never faces freezing water in the winters.</p>
-                 <Link to="/services/geysers" style={styles.serviceLink}>Explore Geysers →</Link>
-              </div>
+                 <p style={styles.serviceText}>Instant geyser installation, repair, and maintenance by verified local technicians.</p>
+                 <span style={styles.serviceLink}>Find Geyser Experts <ArrowRight size={16} /></span>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS PROCESS SECTION */}
+      {/* HOW IT WORKS — FOR CUSTOMERS */}
       <section id="how-it-works" style={styles.processSection}>
         <div className="container">
           <h2 style={{...styles.heading2, textAlign: 'center'}}>How Pro Fix Works</h2>
+          
+          {/* For Customers */}
+          <div style={styles.processLabel}><Users size={18} /> For Customers</div>
           <div style={styles.processGrid}>
              <div style={styles.processLine}></div>
              <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.1s'}}>
                 <div style={styles.processNumber}>1</div>
-                <h3 style={styles.processTitle}>Book Instantly</h3>
-                <p style={styles.processText}>Call us or chat directly on WhatsApp. Tell us what's broken and share your location in NCR.</p>
+                <h3 style={styles.processTitle}>Search Nearby</h3>
+                <p style={styles.processText}>Allow location access and select the service you need. We'll find providers near you.</p>
              </div>
              <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.2s'}}>
                 <div style={styles.processNumber}>2</div>
-                <h3 style={styles.processTitle}>90-Min Dispatch</h3>
-                <p style={styles.processText}>A verified, uniformed expert is dispatched to your doorstep equipped with genuine spares.</p>
+                <h3 style={styles.processTitle}>Compare & Contact</h3>
+                <p style={styles.processText}>See ratings, distance, and services. Call or WhatsApp the right provider directly.</p>
              </div>
              <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.3s'}}>
                 <div style={styles.processNumber}>3</div>
-                <h3 style={styles.processTitle}>Fixed & Guaranteed</h3>
-                <p style={styles.processText}>Approve our upfront quote, get the problem resolved cleanly, and enjoy our post-service warranty.</p>
+                <h3 style={styles.processTitle}>Get it Fixed</h3>
+                <p style={styles.processText}>A verified expert arrives, provides upfront pricing, and resolves the problem cleanly.</p>
              </div>
+          </div>
+
+          {/* For Businesses */}
+          <div style={{...styles.processLabel, marginTop: '64px'}}><Store size={18} /> For Service Businesses</div>
+          <div style={styles.processGrid}>
+             <div style={{...styles.processLine, background: 'linear-gradient(90deg, var(--color-surface-container) 0%, var(--color-secondary) 50%, var(--color-surface-container) 100%)'}}></div>
+             <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.1s'}}>
+                <div style={{...styles.processNumber, background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))'}}>1</div>
+                <h3 style={styles.processTitle}>Register Free</h3>
+                <p style={styles.processText}>Add your business details, services offered, and shop location with geo-tagging.</p>
+             </div>
+             <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.2s'}}>
+                <div style={{...styles.processNumber, background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))'}}>2</div>
+                <h3 style={styles.processTitle}>Get Verified</h3>
+                <p style={styles.processText}>Our admin team reviews and approves your listing. You'll go live once verified.</p>
+             </div>
+             <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.3s'}}>
+                <div style={{...styles.processNumber, background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))'}}>3</div>
+                <h3 style={styles.processTitle}>Receive Customers</h3>
+                <p style={styles.processText}>Customers searching nearby will find you, call directly, or send service requests.</p>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA — Register Your Business */}
+      <section style={styles.ctaSection}>
+        <div className="container" style={styles.ctaContainer}>
+          <div className="animate-fade-in-up" style={styles.ctaContent}>
+            <div style={styles.ctaIconRow}>
+              <Zap size={40} color="var(--color-primary)" />
+            </div>
+            <h2 style={styles.ctaHeading}>Are You a Local Service Provider?</h2>
+            <p style={styles.ctaText}>
+              List your business for free and reach thousands of customers searching for services in your area. 
+              AC repair, plumbing, electrical — whatever your expertise, customers are looking for you.
+            </p>
+            <div style={styles.ctaActions}>
+              <Link to="/register" className="btn-secondary" style={styles.ctaBtn}>
+                Register Your Business — Free
+              </Link>
+              <Link to="/login" style={styles.ctaLoginLink}>Already registered? Sign in →</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -117,23 +172,24 @@ const Home = () => {
       <section id="why-us" style={styles.trustSection}>
          <div className="container" style={styles.trustContainer}>
              <div className="animate-fade-in-up" style={{flex: '1 1 400px'}}>
-                 <h2 style={styles.heading2}>Why Delhi NCR Trusts Pro Fix</h2>
+                 <h2 style={styles.heading2}>Why Choose Pro Fix</h2>
                  <p style={{fontSize: '1.2rem', color: 'var(--color-on-surface-variant)', lineHeight: 1.6}}>
-                    We believe in doing the job exactly right the first time. We use premium genuine parts, offer straightforward upfront pricing in ₹, and stand behind our work with a Google verified guarantee.
+                    We connect customers with verified local service businesses. Every shop on our platform passes admin verification, ensuring quality and trust.
                  </p>
                  <ul style={{listStyle: 'none', padding: 0, marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>No Hidden Costs or Upselling</strong></li>
-                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>Mess-Free Service Guarantee</strong></li>
-                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>Same-Day Emergency Resolution</strong></li>
+                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>Admin-Verified Businesses Only</strong></li>
+                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>Geo-Tagged Location Search</strong></li>
+                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>Direct Call & WhatsApp Contact</strong></li>
+                    <li style={{display: 'flex', gap: '16px', alignItems: 'center', fontSize: '1.1rem'}}><CheckCircle color="var(--color-primary)" size={28}/> <strong>Free Registration for Businesses</strong></li>
                  </ul>
              </div>
              <div className="animate-fade-in-up animate-float" style={{flex: '1 1 400px', position: 'relative'}}>
-                <img src="/trusted_tech.png" alt="Trusted HVAC Technician" style={styles.trustImage} />
+                <img src="/trusted_tech.png" alt="Trusted Service Provider" style={styles.trustImage} />
                 <div className="glass-panel" style={styles.trustBadge}>
                    <ShieldCheck color="#25d366" size={24} />
                    <div style={{display: 'flex', flexDirection: 'column'}}>
-                     <span style={{fontWeight: '800', lineHeight: 1.2}}>Google Verified</span>
-                     <span style={{fontSize: '0.8rem', opacity: 0.8}}>Professional Services</span>
+                     <span style={{fontWeight: '800', lineHeight: 1.2}}>Admin Verified</span>
+                     <span style={{fontSize: '0.8rem', opacity: 0.8}}>Every listed business</span>
                    </div>
                 </div>
              </div>
@@ -143,21 +199,21 @@ const Home = () => {
       {/* REVIEWS SECTION */}
       <section id="reviews" style={styles.reviewSection}>
         <div className="container">
-          <h2 style={{...styles.heading2, textAlign: 'center', marginBottom: '56px'}}>NCR Relies on Pro Fix</h2>
+          <h2 style={{...styles.heading2, textAlign: 'center', marginBottom: '56px'}}>Trusted Across India</h2>
           <div style={styles.reviewCards}>
             <div className="glass-card" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
-              <p style={styles.reviewText}>"My Split AC died completely in mid-May. Pro Fix had a tech out to my apartment in South Delhi within an hour. Professional and very reasonable rates!"</p>
+              <p style={styles.reviewText}>"Found an AC repair shop just 2km away within seconds! The technician arrived in 30 minutes and fixed everything. Pro Fix is a game changer."</p>
               <p style={styles.reviewer}>- Neha K., South Extension</p>
             </div>
             <div className="glass-card" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
-              <p style={styles.reviewText}>"Upfront pricing and no upselling. They quickly diagnosed the gas leak, repaired the copper piping, and recharged the AC. Highly recommend."</p>
-              <p style={styles.reviewer}>- Sameer S., DLF Phase 3, Gurgaon</p>
+              <p style={styles.reviewText}>"As a plumbing business owner, registering on Pro Fix has doubled my customer inquiries. The geo-tagging feature shows me to people right in my area."</p>
+              <p style={styles.reviewer}>- Rajesh S., Gurgaon</p>
             </div>
              <div className="glass-card" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
-              <p style={styles.reviewText}>"Had a major plumbing leak in the bathroom. The plumber arrived on time, was extremely polite, and left the bathroom spotless after fixing the pipe."</p>
+              <p style={styles.reviewText}>"Had a plumbing emergency at 10 PM. Searched on Pro Fix, found a nearby shop still open, and the plumber came within an hour. Incredible!"</p>
               <p style={styles.reviewer}>- Anuj T., Noida Sector 50</p>
             </div>
           </div>
@@ -202,7 +258,7 @@ const Home = () => {
 
 const styles = {
   heroSection: {
-    minHeight: 'calc(100vh - 80px)', // Fit exactly into the viewport beneath navbar
+    minHeight: 'calc(100vh - 80px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -266,7 +322,7 @@ const styles = {
   },
   heroActions: {
     display: 'flex',
-    gap: '24px',
+    gap: '20px',
     justifyContent: 'center',
     alignItems: 'center',
     flexWrap: 'wrap'
@@ -275,16 +331,21 @@ const styles = {
     padding: '14px 30px',
     fontSize: '1rem',
     borderRadius: '12px',
-    display: 'inline-block',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '10px',
     boxShadow: '0 15px 35px rgba(0, 60, 137, 0.5)',
     fontWeight: '800'
   },
   secondaryLink: {
     fontWeight: '700',
     color: '#ffffff',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
     borderBottom: '2px solid rgba(255,255,255,0.3)',
     paddingBottom: '4px',
-    fontSize: '1.1rem',
+    fontSize: '1.05rem',
     transition: 'border-color 0.3s'
   },
   servicesSection: {
@@ -310,7 +371,9 @@ const styles = {
     padding: 'clamp(24px, 4vw, 48px) clamp(20px, 3vw, 40px)',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-start'
+    alignItems: 'flex-start',
+    textDecoration: 'none',
+    color: 'inherit',
   },
   iconWrapper: {
     width: '64px',
@@ -346,6 +409,18 @@ const styles = {
   processSection: {
     backgroundColor: 'var(--color-surface-container-lowest)',
     padding: 'clamp(60px, 10vw, 140px) 0'
+  },
+  processLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '800',
+    color: 'var(--color-primary)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    marginBottom: '32px',
+    justifyContent: 'center',
   },
   processGrid: {
     display: 'grid',
@@ -391,9 +466,56 @@ const styles = {
     lineHeight: 1.6,
     fontSize: '1.1rem'
   },
+  ctaSection: {
+    padding: 'clamp(60px, 10vw, 120px) 0',
+    backgroundColor: 'var(--color-surface)',
+  },
+  ctaContainer: {
+    maxWidth: '800px',
+    margin: '0 auto',
+  },
+  ctaContent: {
+    textAlign: 'center',
+    background: 'linear-gradient(135deg, rgba(0,60,137,0.04), rgba(0,60,137,0.08))',
+    border: '2px solid rgba(0,60,137,0.1)',
+    borderRadius: '24px',
+    padding: 'clamp(32px, 6vw, 64px)',
+  },
+  ctaIconRow: {
+    marginBottom: '24px',
+  },
+  ctaHeading: {
+    fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
+    marginBottom: '16px',
+  },
+  ctaText: {
+    fontSize: '1.1rem',
+    color: 'var(--color-on-surface-variant)',
+    lineHeight: 1.6,
+    maxWidth: '600px',
+    margin: '0 auto 32px',
+  },
+  ctaActions: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  ctaBtn: {
+    padding: '16px 36px',
+    borderRadius: '12px',
+    fontSize: '1.05rem',
+    fontWeight: '800',
+    display: 'inline-block',
+  },
+  ctaLoginLink: {
+    color: 'var(--color-on-surface-variant)',
+    fontWeight: '600',
+    fontSize: '0.9rem',
+  },
   trustSection: {
      padding: 'clamp(60px, 10vw, 140px) 0',
-     backgroundColor: 'var(--color-surface)'
+     backgroundColor: 'var(--color-surface-container-lowest)'
   },
   trustContainer: {
     display: 'flex', 
@@ -422,7 +544,7 @@ const styles = {
   },
   reviewSection: {
     padding: 'clamp(60px, 10vw, 140px) 0',
-    backgroundColor: 'var(--color-surface-container-lowest)',
+    backgroundColor: 'var(--color-surface)',
   },
   reviewCards: {
     display: 'grid',
@@ -452,7 +574,7 @@ const styles = {
   },
   faqSection: {
      padding: 'clamp(60px, 10vw, 140px) 0',
-     backgroundColor: 'var(--color-surface)'
+     backgroundColor: 'var(--color-surface-container-lowest)'
   }
 };
 

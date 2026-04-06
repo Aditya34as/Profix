@@ -1,6 +1,7 @@
 import SEO from '../components/SEO';
 import ContactForm from '../components/ContactForm';
 import AnnouncementBar from '../components/AnnouncementBar';
+import NearbyShops from '../components/NearbyShops';
 import { Phone, CheckCircle, Shield, Clock } from 'lucide-react';
 
 const plumbingServiceSchema = {
@@ -137,6 +138,13 @@ const Plumbing = () => {
               <p style={styles.reviewer}>- Aman P., Sector 15 Noida</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Nearby Plumbing Shops */}
+      <section style={{ backgroundColor: 'var(--color-surface)', padding: '0 0 20px' }}>
+        <div className="container">
+          <NearbyShops service="plumbing" title="Plumbing Shops Near You" limit={3} />
         </div>
       </section>
       
