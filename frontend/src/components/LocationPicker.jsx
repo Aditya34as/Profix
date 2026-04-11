@@ -1,104 +1,119 @@
 import { useState } from 'react';
 import { MapPin, LocateFixed, Loader } from 'lucide-react';
 
-const LocationPicker = ({ onLocationSelect, initialLat, initialLng }) => {
-  const [latitude, setLatitude] = useState(initialLat || '');
-  const [longitude, setLongitude] = useState(initialLng || '');
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+/**
+ * @param {object} props
+ * @param {string} props.latitude
+ * @param {string} props.longitude
+ * @param {(p: { latitude: string, longitude: string, address?: object }) => void} props.onLocationSelect
+ * @param {string} [props.geocodeBaseUrl]
+ */
+const LocationPicker = ({
+  latitude,
+  longitude,
+  onLocationSelect,
+  geocodeBaseUrl = API_URL,
+  /** When false, hide auto-detect (e.g. business registration — enter coordinates manually). */
+  enableAutoDetect = true,
+}) => {
   const [detecting, setDetecting] = useState(false);
-  const [error, setError] = useState('');
-  const [detected, setDetected] = useState(false);
-
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser');
-      return;
-    }
-
-    setDetecting(true);
-    setError('');
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude.toFixed(6);
-        const lng = position.coords.longitude.toFixed(6);
-        setLatitude(lat);
-        setLongitude(lng);
-        setDetecting(false);
-        setDetected(true);
-        onLocationSelect?.({ latitude: lat, longitude: lng });
-      },
-      (err) => {
-        setDetecting(false);
-        switch (err.code) {
-          case err.PERMISSION_DENIED:
-            setError('Location permission denied. Please enter coordinates manually or allow browser location access.');
-            break;
-          case err.POSITION_UNAVAILABLE:
-            setError('Location information is unavailable.');
-            break;
-          case err.TIMEOUT:
-            setError('Location request timed out. Please try again.');
-            break;
-          default:
-            setError('An unknown error occurred.');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  };
+  const [detectError, setDetectError] = useState('');
 
   const handleManualChange = (field, value) => {
     if (field === 'lat') {
-      setLatitude(value);
-      if (value && longitude) {
-        onLocationSelect?.({ latitude: value, longitude });
-      }
+      onLocationSelect?.({ latitude: value, longitude: longitude ?? '' });
     } else {
-      setLongitude(value);
-      if (latitude && value) {
-        onLocationSelect?.({ latitude, longitude: value });
-      }
+      onLocationSelect?.({ latitude: latitude ?? '', longitude: value });
     }
-    setDetected(false);
+  };
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      setDetectError('Geolocation is not supported in this browser.');
+      return;
+    }
+    setDetectError('');
+    setDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const latStr = String(lat);
+        const lngStr = String(lng);
+        try {
+          const res = await fetch(
+            `${geocodeBaseUrl}/api/geocode/reverse?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`
+          );
+          const data = await res.json();
+          if (data.success && data.address) {
+            onLocationSelect?.({
+              latitude: latStr,
+              longitude: lngStr,
+              address: data.address,
+            });
+          } else {
+            onLocationSelect?.({ latitude: latStr, longitude: lngStr });
+          }
+        } catch {
+          onLocationSelect?.({ latitude: latStr, longitude: lngStr });
+        } finally {
+          setDetecting(false);
+        }
+      },
+      () => {
+        setDetecting(false);
+        setDetectError('Could not access your location. Allow location permission or enter coordinates below.');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
   };
 
   return (
     <div style={styles.container}>
       <label style={styles.label}>
-        <MapPin size={18} /> Shop Location
+        <MapPin size={18} /> Shop location
       </label>
 
-      {/* Auto-detect button */}
-      <button
-        type="button"
-        onClick={detectLocation}
-        disabled={detecting}
-        style={{
-          ...styles.detectBtn,
-          opacity: detecting ? 0.7 : 1,
-        }}
-      >
-        {detecting ? (
-          <><Loader size={18} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} /> Detecting your location...</>
-        ) : detected ? (
-          <><LocateFixed size={18} color="#22c55e" /> Location detected — {latitude}, {longitude}</>
-        ) : (
-          <><LocateFixed size={18} /> Auto-detect my location</>
-        )}
-      </button>
+      <p style={styles.hint}>
+        {enableAutoDetect
+          ? 'Use auto-detect to fill coordinates and address fields, or type latitude and longitude manually.'
+          : 'Enter your shop’s latitude and longitude (from Google Maps: right-click your pin → copy coordinates). Address fields above help customers find you.'}
+      </p>
 
-      {error && <p style={styles.error}>{error}</p>}
-
-      <div style={styles.divider}>
-        <span style={styles.dividerText}>or enter manually</span>
-      </div>
+      {enableAutoDetect ? (
+        <>
+          <button
+            type="button"
+            onClick={detectLocation}
+            disabled={detecting}
+            style={{
+              ...styles.detectBtn,
+              opacity: detecting ? 0.75 : 1,
+              cursor: detecting ? 'wait' : 'pointer',
+            }}
+          >
+            {detecting ? (
+              <>
+                <Loader size={18} style={{ animation: 'spin 0.9s linear infinite' }} /> Detecting…
+              </>
+            ) : (
+              <>
+                <LocateFixed size={18} /> Auto-detect my location
+              </>
+            )}
+          </button>
+          {detectError ? <p style={styles.error}>{detectError}</p> : null}
+        </>
+      ) : null}
 
       <div style={styles.coordsRow}>
         <div style={styles.coordField}>
-          <label style={styles.smallLabel}>Latitude</label>
+          <label style={styles.smallLabel}>Latitude *</label>
           <input
-            type="number"
-            step="any"
+            type="text"
+            inputMode="decimal"
             placeholder="e.g. 28.6139"
             value={latitude}
             onChange={(e) => handleManualChange('lat', e.target.value)}
@@ -107,10 +122,10 @@ const LocationPicker = ({ onLocationSelect, initialLat, initialLng }) => {
           />
         </div>
         <div style={styles.coordField}>
-          <label style={styles.smallLabel}>Longitude</label>
+          <label style={styles.smallLabel}>Longitude *</label>
           <input
-            type="number"
-            step="any"
+            type="text"
+            inputMode="decimal"
             placeholder="e.g. 77.2090"
             value={longitude}
             onChange={(e) => handleManualChange('lng', e.target.value)}
@@ -120,8 +135,7 @@ const LocationPicker = ({ onLocationSelect, initialLat, initialLng }) => {
         </div>
       </div>
 
-      {/* Google Maps preview */}
-      {latitude && longitude && (
+      {latitude && longitude && !Number.isNaN(parseFloat(latitude)) && !Number.isNaN(parseFloat(longitude)) && (
         <div style={styles.mapPreview}>
           <iframe
             title="Shop location preview"
@@ -135,9 +149,7 @@ const LocationPicker = ({ onLocationSelect, initialLat, initialLng }) => {
         </div>
       )}
 
-      <p style={styles.hint}>
-        💡 Tip: Use Google Maps to find your exact coordinates. Right-click on your location → "What's here?"
-      </p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
@@ -168,9 +180,8 @@ const styles = {
     color: 'var(--color-primary)',
     fontWeight: '700',
     fontSize: '0.95rem',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
     fontFamily: 'var(--font-body)',
+    transition: 'all 0.2s',
   },
   error: {
     color: '#dc2626',
@@ -180,19 +191,6 @@ const styles = {
     background: '#fef2f2',
     borderRadius: '8px',
     border: '1px solid #fecaca',
-  },
-  divider: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-  dividerText: {
-    fontSize: '0.8rem',
-    color: 'var(--color-outline)',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    whiteSpace: 'nowrap',
   },
   coordsRow: {
     display: 'grid',
@@ -226,7 +224,7 @@ const styles = {
     border: '2px solid var(--color-surface-container)',
   },
   hint: {
-    fontSize: '0.8rem',
+    fontSize: '0.85rem',
     color: 'var(--color-outline)',
     margin: 0,
     lineHeight: 1.5,

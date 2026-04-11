@@ -5,8 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { 
   Store, MapPin, Phone, Clock, Edit3, Save, LogOut, Upload, 
-  CheckCircle, AlertCircle, Eye, Image, X
+  CheckCircle, AlertCircle, Eye, Image, Star, Inbox, Activity
 } from 'lucide-react';
+import StarRow from '../components/Stars';
 
 const SERVICE_OPTIONS = [
   { value: 'ac-repair', label: 'AC Repair' },
@@ -26,6 +27,10 @@ const ShopDashboard = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState(null);
+  const [leads, setLeads] = useState([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -35,6 +40,7 @@ const ShopDashboard = () => {
 
   useEffect(() => {
     if (shop) {
+      const [lng, lat] = shop.location?.coordinates || [];
       setFormData({
         businessName: shop.businessName || '',
         ownerName: shop.ownerName || '',
@@ -44,20 +50,93 @@ const ShopDashboard = () => {
         openingHours: shop.openingHours || '',
         services: shop.services || [],
         address: shop.address || { street: '', city: '', state: '', pincode: '' },
+        longitude: lng != null ? String(lng) : '',
+        latitude: lat != null ? String(lat) : '',
       });
     }
   }, [shop]);
 
+  useEffect(() => {
+    if (!token || !shop?._id) return;
+    let cancelled = false;
+    (async () => {
+      setLeadsLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/api/shops/me/leads`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!cancelled && data.success) setLeads(data.leads || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setLeadsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [token, shop?._id, API_URL]);
+
+  useEffect(() => {
+    if (!token || !shop?._id) return;
+    let cancelled = false;
+    (async () => {
+      setReviewsLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/api/shops/me/reviews`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!cancelled && data.success) setReviews(data.reviews || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setReviewsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [token, shop?._id, API_URL]);
+
+  const updateLeadStatus = async (leadId, status) => {
+    try {
+      const res = await fetch(`${API_URL}/api/shops/me/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLeads((prev) => prev.map((l) => (l._id === leadId ? { ...l, status } : l)));
+        toast.success('Lead updated');
+      } else {
+        toast.error(data.error || 'Update failed');
+      }
+    } catch {
+      toast.error('Update failed');
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
+      const lat = parseFloat(formData.latitude);
+      const lng = parseFloat(formData.longitude);
+      const payload = { ...formData };
+      delete payload.latitude;
+      delete payload.longitude;
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        payload.latitude = lat;
+        payload.longitude = lng;
+      }
       const res = await fetch(`${API_URL}/api/shops/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
@@ -136,8 +215,39 @@ const ShopDashboard = () => {
           {/* Header */}
           <div style={styles.header}>
             <div>
-              <h1 style={styles.pageTitle}>Business Dashboard</h1>
-              <p style={styles.pageSubtitle}>Manage your shop profile and settings</p>
+              <h1 style={styles.pageTitle}>Your business hub</h1>
+              <p style={styles.pageSubtitle}>
+                Everything for <strong>{shop?.businessName}</strong> in one place — visibility, leads, and what customers say about you.
+              </p>
+              <div style={styles.statsRow}>
+                <div style={styles.statCard}>
+                  <Activity size={22} color="var(--color-primary)" />
+                  <span style={styles.statLabel}>Listing</span>
+                  <strong style={styles.statValue}>
+                    {shop?.isApproved ? 'Live on search' : 'Pending review'}
+                  </strong>
+                </div>
+                <div style={styles.statCard}>
+                  <Star size={22} color="#f59e0b" />
+                  <span style={styles.statLabel}>Rating</span>
+                  <div style={{ marginTop: '4px' }}>
+                    <StarRow value={shop?.rating || 0} size={18} showNumber />
+                  </div>
+                  <span style={styles.statHint}>{shop?.totalReviews || 0} reviews</span>
+                </div>
+                <div style={styles.statCard}>
+                  <Inbox size={22} color="var(--color-secondary)" />
+                  <span style={styles.statLabel}>Open leads</span>
+                  <strong style={styles.statValue}>
+                    {leadsLoading ? '…' : leads.filter((l) => l.status === 'new').length}
+                  </strong>
+                  <span style={styles.statHint}>Total {leads.length} requests</span>
+                </div>
+              </div>
+              <p style={styles.dashboardBlurb}>
+                <strong>Profile &amp; gallery</strong> — how you look to customers. <strong>Leads</strong> — form requests from your public page.
+                <strong> Reviews</strong> — feedback left on your listing. Approve listings in <Link to="/admin" style={{ color: 'var(--color-primary)', fontWeight: 700 }}>Admin</Link> if you run the platform.
+              </p>
             </div>
             <div style={styles.headerActions}>
               <Link to={`/shop/${shop?._id}`} style={styles.previewBtn}>
@@ -161,6 +271,15 @@ const ShopDashboard = () => {
             <div style={styles.approvedBanner}>
               <CheckCircle size={20} />
               <span><strong>Verified & Live</strong> — Your shop is visible to customers searching nearby.</span>
+            </div>
+          )}
+
+          {shop && !shop.location?.coordinates?.length && (
+            <div style={styles.locationNudge}>
+              <MapPin size={20} />
+              <span>
+                <strong>Add your map pin</strong> — In <em>Business Details</em> below, tap <strong>Edit</strong>, enter <strong>Latitude</strong> &amp; <strong>Longitude</strong> (from Google Maps), then <strong>Save</strong>. The map preview appears once both are set.
+              </span>
             </div>
           )}
 
@@ -340,6 +459,35 @@ const ShopDashboard = () => {
                   </div>
                 </div>
 
+                <div style={styles.fieldRow}>
+                  <label style={styles.fieldLabel}>Map pin (for nearby search)</label>
+                  <p style={{ margin: '0 0 8px', fontSize: '0.82rem', color: 'var(--color-on-surface-variant)' }}>
+                    Paste from Google Maps (right-click → coordinates). Needed to show in &quot;near me&quot; results.
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="Latitude"
+                      value={formData.latitude ?? ''}
+                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                      disabled={!editing}
+                      style={{ ...styles.input, opacity: editing ? 1 : 0.7 }}
+                      className="form-input-auth"
+                    />
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="Longitude"
+                      value={formData.longitude ?? ''}
+                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                      disabled={!editing}
+                      style={{ ...styles.input, opacity: editing ? 1 : 0.7 }}
+                      className="form-input-auth"
+                    />
+                  </div>
+                </div>
+
                 {editing && (
                   <div style={styles.fieldRow}>
                     <label style={styles.fieldLabel}>Services Offered</label>
@@ -401,6 +549,102 @@ const ShopDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* Reviews from customers */}
+          <div className="glass-card" style={{ padding: '24px', marginTop: '24px' }}>
+            <h3 style={styles.sectionTitle}><Star size={18} /> Customer reviews</h3>
+            <p style={{ margin: '0 0 16px', color: 'var(--color-on-surface-variant)', fontSize: '0.95rem' }}>
+              Ratings and comments from people who used your listing on Pro Fix.
+            </p>
+            {reviewsLoading ? (
+              <p style={{ color: 'var(--color-outline)' }}>Loading reviews…</p>
+            ) : reviews.length === 0 ? (
+              <p style={{ margin: 0, color: 'var(--color-on-surface-variant)' }}>No reviews yet. Share your public profile so customers can leave feedback.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {reviews.slice(0, 8).map((r) => (
+                  <div
+                    key={r._id}
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--color-surface-container)',
+                      background: 'var(--color-surface-container-low)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                      <strong>{r.reviewerName}</strong>
+                      <StarRow value={r.rating} size={16} showNumber />
+                    </div>
+                    {r.comment ? <p style={{ margin: '8px 0 0', fontSize: '0.95rem', lineHeight: 1.5 }}>{r.comment}</p> : null}
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-outline)' }}>
+                      {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Customer leads (shop-specific requests) */}
+          <div className="glass-card" style={{ padding: '24px', marginTop: '24px' }}>
+            <h3 style={styles.sectionTitle}><Phone size={18} /> Customer leads</h3>
+            <p style={{ margin: '0 0 16px', color: 'var(--color-on-surface-variant)', fontSize: '0.95rem' }}>
+              Requests submitted from your public profile or tagged with your shop.
+            </p>
+            {leadsLoading ? (
+              <p style={{ color: 'var(--color-on-surface-variant)' }}>Loading leads…</p>
+            ) : leads.length === 0 ? (
+              <p style={{ margin: 0, color: 'var(--color-on-surface-variant)' }}>No leads yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {leads.map((lead) => (
+                  <div
+                    key={lead._id}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--color-surface-container)',
+                      background: 'var(--color-surface-container-low)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' }}>
+                      <div>
+                        <strong style={{ fontSize: '1rem' }}>{lead.name}</strong>
+                        <span style={{ color: 'var(--color-on-surface-variant)', marginLeft: '8px' }}>{lead.phone}</span>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--color-on-surface-variant)', marginTop: '6px' }}>
+                          Service: {lead.serviceRequested}
+                        </div>
+                        {lead.message ? (
+                          <p style={{ margin: '8px 0 0', fontSize: '0.95rem', lineHeight: 1.5 }}>{lead.message}</p>
+                        ) : null}
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-outline)', marginTop: '8px' }}>
+                          {lead.createdAt ? new Date(lead.createdAt).toLocaleString() : ''}
+                        </div>
+                      </div>
+                      <select
+                        value={lead.status || 'new'}
+                        onChange={(e) => updateLeadStatus(lead._id, e.target.value)}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '2px solid var(--color-surface-container)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
@@ -426,9 +670,50 @@ const styles = {
     margin: '0 0 4px',
   },
   pageSubtitle: {
-    margin: 0,
+    margin: '0 0 20px',
     color: 'var(--color-on-surface-variant)',
     fontSize: '1.05rem',
+    maxWidth: '640px',
+    lineHeight: 1.5,
+  },
+  statsRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '16px',
+    marginBottom: '20px',
+    maxWidth: '900px',
+  },
+  statCard: {
+    padding: '18px 20px',
+    borderRadius: '14px',
+    background: 'var(--color-surface-container-lowest)',
+    border: '1px solid var(--color-surface-container)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+  },
+  statLabel: {
+    fontSize: '0.72rem',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: 'var(--color-outline)',
+  },
+  statValue: {
+    fontSize: '1.05rem',
+    color: 'var(--color-on-surface)',
+  },
+  statHint: {
+    fontSize: '0.8rem',
+    color: 'var(--color-on-surface-variant)',
+  },
+  dashboardBlurb: {
+    fontSize: '0.92rem',
+    color: 'var(--color-on-surface-variant)',
+    lineHeight: 1.6,
+    maxWidth: '720px',
+    margin: '0 0 8px',
   },
   headerActions: {
     display: 'flex',
@@ -486,6 +771,20 @@ const styles = {
     fontWeight: '600',
     fontSize: '0.95rem',
     marginBottom: '24px',
+  },
+  locationNudge: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '12px',
+    padding: '16px 20px',
+    borderRadius: '12px',
+    background: 'rgba(0, 60, 137, 0.06)',
+    border: '1px solid var(--color-primary-container)',
+    color: 'var(--color-on-surface)',
+    fontWeight: '600',
+    fontSize: '0.95rem',
+    marginBottom: '24px',
+    lineHeight: 1.5,
   },
   dashboardGrid: {
     display: 'grid',

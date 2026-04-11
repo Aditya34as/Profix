@@ -53,10 +53,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (formData) => {
+    const { confirmPassword: _c, ...rest } = formData;
+    const payload = {
+      businessName: rest.businessName?.trim(),
+      ownerName: rest.ownerName?.trim(),
+      email: rest.email?.trim(),
+      password: rest.password,
+      phone: rest.phone?.trim(),
+      whatsappNumber: (rest.whatsappNumber || '').trim(),
+      services: rest.services,
+      address: rest.address || {},
+      description: (rest.description || '').trim(),
+      openingHours: rest.openingHours || 'Mon-Sat 8AM-8PM',
+    };
     const res = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
     if (data.success) {

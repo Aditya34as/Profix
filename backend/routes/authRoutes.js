@@ -19,10 +19,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please fill all required fields' });
     }
 
-    if (!longitude || !latitude) {
-      return res.status(400).json({ success: false, error: 'Location coordinates are required' });
-    }
-
     if (!services || services.length === 0) {
       return res.status(400).json({ success: false, error: 'Please select at least one service' });
     }
@@ -37,7 +33,11 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create shop
+    const lng = longitude != null && longitude !== '' ? parseFloat(longitude) : NaN;
+    const lat = latitude != null && latitude !== '' ? parseFloat(latitude) : NaN;
+    const hasCoords = Number.isFinite(lng) && Number.isFinite(lat);
+
+    // Create shop (map location optional — add pin later in dashboard for nearby search)
     const shop = new Shop({
       businessName,
       ownerName,
@@ -47,10 +47,9 @@ router.post('/register', async (req, res) => {
       whatsappNumber: whatsappNumber || phone,
       services,
       address: address || {},
-      location: {
-        type: 'Point',
-        coordinates: [parseFloat(longitude), parseFloat(latitude)]
-      },
+      ...(hasCoords
+        ? { location: { type: 'Point', coordinates: [lng, lat] } }
+        : {}),
       description: description || '',
       openingHours: openingHours || 'Mon-Sat 8AM-8PM',
       isApproved: false // Requires admin approval
@@ -74,6 +73,13 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors || {}).map((e) => e.message).join(' ');
+      return res.status(400).json({ success: false, error: msg || 'Invalid registration data' });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, error: 'A shop with this email already exists' });
+    }
     res.status(500).json({ success: false, error: 'Server error during registration' });
   }
 });

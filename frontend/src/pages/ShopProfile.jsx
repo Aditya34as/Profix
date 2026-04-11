@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import ContactForm from '../components/ContactForm';
-import { MapPin, Phone, MessageCircle, Star, Clock, CheckCircle, ArrowLeft, Image } from 'lucide-react';
+import WhatsAppFloat from '../components/WhatsAppFloat';
+import StarRow from '../components/Stars';
+import { useAuth } from '../context/AuthContext';
+import { MapPin, Phone, MessageCircle, Star, Clock, CheckCircle, ArrowLeft, Image, Send } from 'lucide-react';
+import { toast } from 'sonner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -19,21 +23,34 @@ const SERVICE_LABELS = {
 
 const ShopProfile = () => {
   const { id } = useParams();
+  const { token } = useAuth();
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImage, setActiveImage] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [reviewForm, setReviewForm] = useState({ reviewerName: '', rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
-  useEffect(() => {
-    fetchShop();
-  }, [id]);
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/shops/${id}/reviews`);
+      const data = await res.json();
+      if (data.success) setReviews(data.reviews || []);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const fetchShop = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/shops/${id}`);
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(`${API_URL}/api/shops/${id}`, { headers });
       const data = await res.json();
       if (data.success) {
         setShop(data.shop);
+        fetchReviews();
       } else {
         setError('Shop not found');
       }
@@ -41,6 +58,39 @@ const ShopProfile = () => {
       setError('Failed to load shop details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShop();
+  }, [id, token]);
+
+  const submitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewForm.reviewerName.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`${API_URL}/api/shops/${id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Thanks for your review!');
+        setReviewForm({ reviewerName: '', rating: 5, comment: '' });
+        fetchReviews();
+        fetchShop();
+      } else {
+        toast.error(data.error || 'Could not submit review');
+      }
+    } catch {
+      toast.error('Could not submit review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -97,10 +147,11 @@ const ShopProfile = () => {
                     <h1 style={styles.shopName}>{shop.businessName}</h1>
                     <p style={styles.ownerName}>by {shop.ownerName}</p>
                     <div style={styles.ratingRow}>
-                      <Star size={18} color="#f59e0b" fill="#f59e0b" />
-                      <span style={styles.ratingText}>
-                        {shop.rating > 0 ? shop.rating.toFixed(1) : 'New Business'}
-                        {shop.totalReviews > 0 && ` (${shop.totalReviews} reviews)`}
+                      <StarRow value={shop.rating || 0} size={20} showNumber={shop.rating > 0} />
+                      <span style={styles.ratingMeta}>
+                        {shop.totalReviews > 0
+                          ? `${shop.totalReviews} review${shop.totalReviews !== 1 ? 's' : ''}`
+                          : 'No reviews yet — be the first'}
                       </span>
                     </div>
                   </div>
@@ -111,9 +162,9 @@ const ShopProfile = () => {
                   <a href={`tel:${shop.phone}`} style={styles.callBtn}>
                     <Phone size={18} /> Call Now
                   </a>
-                  {shop.whatsappNumber && (
+                  {(shop.whatsappNumber || shop.phone) && (
                     <a
-                      href={`https://wa.me/91${shop.whatsappNumber.replace(/\D/g, '').slice(-10)}`}
+                      href={`https://wa.me/91${(shop.whatsappNumber || shop.phone).replace(/\D/g, '').slice(-10)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={styles.waBtn}
@@ -211,13 +262,87 @@ const ShopProfile = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Reviews */}
+                <div style={{ ...styles.section, borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>
+                  <h3 style={styles.sectionTitle}><Star size={18} /> Customer reviews</h3>
+                  {reviews.length === 0 ? (
+                    <p style={{ color: 'var(--color-on-surface-variant)', marginTop: 0 }}>No reviews yet.</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {reviews.map((r) => (
+                        <li key={r._id} style={styles.reviewItem}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                            <strong>{r.reviewerName}</strong>
+                            <StarRow value={r.rating} size={16} showNumber={false} />
+                          </div>
+                          {r.comment ? <p style={styles.reviewComment}>{r.comment}</p> : null}
+                          <span style={styles.reviewDate}>
+                            {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <form onSubmit={submitReview} style={styles.reviewForm}>
+                    <p style={styles.reviewFormTitle}>Rate your experience</p>
+                    <input
+                      type="text"
+                      placeholder="Your name"
+                      value={reviewForm.reviewerName}
+                      onChange={(e) => setReviewForm((f) => ({ ...f, reviewerName: e.target.value }))}
+                      style={styles.reviewInput}
+                      className="form-input-auth"
+                      required
+                    />
+                    <div style={styles.ratingSelect}>
+                      <label htmlFor="profile-rating">Rating</label>
+                      <select
+                        id="profile-rating"
+                        value={reviewForm.rating}
+                        onChange={(e) => setReviewForm((f) => ({ ...f, rating: parseInt(e.target.value, 10) }))}
+                        style={styles.reviewInput}
+                        className="form-input-auth"
+                      >
+                        {[
+                          [5, '5 — Excellent'],
+                          [4, '4 — Good'],
+                          [3, '3 — Average'],
+                          [2, '2 — Poor'],
+                          [1, '1 — Very poor'],
+                        ].map(([n, label]) => (
+                          <option key={n} value={n}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <textarea
+                      placeholder="Tell others about this business (optional)"
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
+                      rows={3}
+                      style={{ ...styles.reviewInput, resize: 'vertical' }}
+                      className="form-input-auth"
+                    />
+                    <button type="submit" className="btn-secondary" style={styles.reviewSubmit} disabled={submittingReview}>
+                      <Send size={16} /> {submittingReview ? 'Sending…' : 'Submit review'}
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
 
             {/* Sidebar: Contact form */}
             <div style={styles.sidebar}>
               <div style={styles.stickyForm}>
-                <ContactForm defaultService={shop.services?.[0] || 'ac-repair'} shopId={shop._id} />
+                <ContactForm
+                  defaultService={shop.services?.[0] || 'ac-repair'}
+                  shopId={shop._id}
+                  whatsappPhone={shop.whatsappNumber || shop.phone}
+                  businessName={shop.businessName}
+                />
               </div>
             </div>
           </div>
@@ -230,6 +355,8 @@ const ShopProfile = () => {
           <img src={`${API_URL}${activeImage}`} alt="" style={styles.lightboxImg} />
         </div>
       )}
+
+      <WhatsAppFloat phoneNumber={shop.whatsappNumber || shop.phone} shopName={shop.businessName} visible />
     </>
   );
 };
@@ -301,12 +428,47 @@ const styles = {
   },
   ratingRow: {
     display: 'flex',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     gap: '6px',
   },
-  ratingText: {
+  ratingMeta: {
+    fontSize: '0.85rem',
+    color: 'var(--color-on-surface-variant)',
     fontWeight: '600',
-    fontSize: '0.95rem',
+  },
+  reviewItem: {
+    padding: '14px 16px',
+    borderRadius: '12px',
+    background: 'var(--color-surface-container-low)',
+    border: '1px solid var(--color-surface-container)',
+  },
+  reviewComment: { margin: '8px 0 0', lineHeight: 1.5, color: 'var(--color-on-surface-variant)' },
+  reviewDate: { fontSize: '0.75rem', color: 'var(--color-outline)' },
+  reviewForm: {
+    marginTop: '24px',
+    padding: '20px',
+    borderRadius: '12px',
+    border: '2px dashed var(--color-surface-container-high)',
+    background: 'var(--color-surface-container-lowest)',
+  },
+  reviewFormTitle: { margin: '0 0 12px', fontWeight: '700', fontSize: '0.95rem' },
+  reviewInput: {
+    width: '100%',
+    marginBottom: '12px',
+    padding: '12px 14px',
+    borderRadius: '8px',
+    border: '2px solid var(--color-surface-container)',
+    fontFamily: 'var(--font-body)',
+    boxSizing: 'border-box',
+  },
+  ratingSelect: { marginBottom: '8px' },
+  reviewSubmit: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    marginTop: '4px',
   },
   contactRow: {
     display: 'flex',

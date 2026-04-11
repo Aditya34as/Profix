@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
-import LocationPicker from '../components/LocationPicker';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
-import { Store, User, Mail, Lock, Phone, ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
+import { Store, ChevronRight, ChevronLeft, CheckCircle, MapPin } from 'lucide-react';
 
 const SERVICE_OPTIONS = [
   { value: 'ac-repair', label: 'AC Repair & HVAC' },
@@ -34,8 +33,6 @@ const RegisterShop = () => {
     whatsappNumber: '',
     services: [],
     address: { street: '', city: '', state: '', pincode: '' },
-    latitude: '',
-    longitude: '',
     description: '',
     openingHours: 'Mon-Sat 8AM-8PM',
   });
@@ -78,12 +75,6 @@ const RegisterShop = () => {
     if (step === 2) {
       if (formData.services.length === 0) {
         toast.error('Select at least one service');
-        return false;
-      }
-    }
-    if (step === 3) {
-      if (!formData.latitude || !formData.longitude) {
-        toast.error('Please set your shop location');
         return false;
       }
     }
@@ -175,7 +166,7 @@ const RegisterShop = () => {
           <div className="animate-fade-in-up" style={styles.formSide}>
             {/* Progress bar */}
             <div style={styles.progressBar}>
-              {[1, 2, 3].map(s => (
+              {[1, 2].map(s => (
                 <div key={s} style={{
                   ...styles.progressStep,
                   background: step >= s 
@@ -187,7 +178,7 @@ const RegisterShop = () => {
                 </div>
               ))}
               <div style={styles.progressLine}>
-                <div style={{...styles.progressFill, width: `${((step - 1) / 2) * 100}%`}} />
+                <div style={{...styles.progressFill, width: `${((step - 1) / 1) * 100}%`}} />
               </div>
             </div>
 
@@ -267,10 +258,13 @@ const RegisterShop = () => {
                 </>
               )}
 
-              {/* Step 2: Services & Address */}
+              {/* Step 2: Services & business details */}
               {step === 2 && (
                 <>
-                  <h2 style={styles.stepTitle}>Services & Address</h2>
+                  <h2 style={styles.stepTitle}><MapPin size={22} /> Services & details</h2>
+                  <p style={styles.stepHint}>
+                    After you’re approved, sign in and open your <strong>Dashboard</strong> to drop your shop on the map so nearby customers can find you in search.
+                  </p>
                   
                   <label style={styles.fieldLabel}>Select Services You Offer *</label>
                   <div style={styles.serviceGrid}>
@@ -352,25 +346,6 @@ const RegisterShop = () => {
                 </>
               )}
 
-              {/* Step 3: Location */}
-              {step === 3 && (
-                <>
-                  <h2 style={styles.stepTitle}><MapPin size={22} /> Shop Location</h2>
-                  <p style={{ color: 'var(--color-on-surface-variant)', marginTop: 0 }}>
-                    This helps customers find you when searching for nearby services. 
-                    The more accurate, the better!
-                  </p>
-                  <LocationPicker
-                    initialLat={formData.latitude}
-                    initialLng={formData.longitude}
-                    onLocationSelect={({ latitude, longitude }) => {
-                      updateField('latitude', latitude);
-                      updateField('longitude', longitude);
-                    }}
-                  />
-                </>
-              )}
-
               {/* Navigation buttons */}
               <div style={styles.navButtons}>
                 {step > 1 && (
@@ -379,7 +354,7 @@ const RegisterShop = () => {
                   </button>
                 )}
                 <div style={{ flex: 1 }} />
-                {step < 3 ? (
+                {step < 2 ? (
                   <button onClick={handleNext} className="btn-secondary" style={styles.nextBtn}>
                     Next <ChevronRight size={18} />
                   </button>
@@ -494,8 +469,14 @@ const styles = {
     alignItems: 'center',
     gap: '10px',
     fontSize: '1.4rem',
-    marginBottom: '24px',
+    marginBottom: '12px',
     color: 'var(--color-on-surface)',
+  },
+  stepHint: {
+    margin: '0 0 20px',
+    fontSize: '0.9rem',
+    color: 'var(--color-on-surface-variant)',
+    lineHeight: 1.55,
   },
   formGrid: {
     display: 'grid',
@@ -638,8 +619,5 @@ const styles = {
     fontSize: '0.95rem',
   },
 };
-
-// Responsive override
-const mediaQuery = `@media (max-width: 900px) { .register-grid { grid-template-columns: 1fr !important; } }`;
 
 export default RegisterShop;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Phone, Menu, X, ChevronDown, Search, Store, LayoutDashboard } from 'lucide-react';
+import { Phone, Menu, X, ChevronDown, Search, Store, LayoutDashboard, Shield } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -107,6 +107,10 @@ const Navbar = () => {
             </div>
             <a href="/#why-us" style={getNavLinkStyle('why-us')}>Why Us</a>
             <a href="/#reviews" style={getNavLinkStyle('reviews')}>Reviews</a>
+            <Link to="/admin" style={{ ...getNavLinkStyle(''), fontSize: '0.85rem', opacity: 0.85 }} title="Approve new businesses">
+              <Shield size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+              Admin
+            </Link>
           </div>
 
           {/* Action Buttons */}
@@ -157,6 +161,9 @@ const Navbar = () => {
               <a href="/#why-us" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>Why Us</a>
               <a href="/#reviews" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>Reviews</a>
               <a href="/#faq" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none'}}>FAQ</a>
+              <Link to="/admin" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <Shield size={18} /> Admin
+              </Link>
             </div>
 
             {/* Business links */}

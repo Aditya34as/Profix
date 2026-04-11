@@ -1,6 +1,10 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Shop = require('../models/Shop');
-const { protect, adminOnly } = require('../middleware/authMiddleware');
+const Lead = require('../models/Lead');
+const Review = require('../models/Review');
+const { protect, adminOnly, JWT_SECRET } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
@@ -186,18 +190,19 @@ router.post('/me/upload', protect, upload.single('image'), async (req, res) => {
   }
 });
 
-// GET /api/shops/:id — Get single shop's public profile
-router.get('/:id', async (req, res) => {
+// --- Admin routes (before /:id so paths like /admin are not captured as ids) ---
+
+// GET /api/shops/admin/pending — List pending shops (admin)
+router.get('/admin/pending', adminOnly, async (req, res) => {
   try {
-    const shop = await Shop.findById(req.params.id).select('-password');
-    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
-    res.json({ success: true, shop });
+    const shops = await Shop.find({ isApproved: false })
+      .select('-password')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, shops });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
-
-// --- ADMIN ROUTES ---
 
 // PUT /api/shops/:id/approve — Admin approve/reject a shop
 router.put('/:id/approve', adminOnly, async (req, res) => {
@@ -221,13 +226,130 @@ router.put('/:id/approve', adminOnly, async (req, res) => {
   }
 });
 
-// GET /api/shops/admin/pending — List pending shops (admin)
-router.get('/admin/pending', adminOnly, async (req, res) => {
+// GET /api/shops/me/leads — Leads for logged-in shop
+router.get('/me/leads', protect, async (req, res) => {
   try {
-    const shops = await Shop.find({ isApproved: false })
-      .select('-password')
-      .sort({ createdAt: -1 });
-    res.json({ success: true, shops });
+    const leads = await Lead.find({ shopId: req.shopId })
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .lean();
+    res.json({ success: true, leads });
+  } catch (error) {
+    console.error('Leads list error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// PATCH /api/shops/me/leads/:leadId — Update lead status
+router.patch('/me/leads/:leadId', protect, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const allowed = ['new', 'contacted', 'completed', 'cancelled'];
+    if (!status || !allowed.includes(status)) {
+      return res.status(400).json({ success: false, error: 'Invalid status' });
+    }
+    const lead = await Lead.findOne({ _id: req.params.leadId, shopId: req.shopId });
+    if (!lead) {
+      return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+    lead.status = status;
+    await lead.save();
+    res.json({ success: true, lead });
+  } catch (error) {
+    console.error('Lead update error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/me/reviews — Reviews for logged-in shop (owner)
+router.get('/me/reviews', protect, async (req, res) => {
+  try {
+    const reviews = await Review.find({ shopId: req.shopId }).sort({ createdAt: -1 }).limit(100).lean();
+    res.json({ success: true, reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/:id/reviews — Public reviews (must be before GET /:id)
+router.get('/:id/reviews', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, error: 'Shop not found' });
+    }
+    const shop = await Shop.findById(req.params.id).select('isApproved isActive');
+    if (!shop || !shop.isApproved || !shop.isActive) {
+      return res.status(404).json({ success: false, error: 'Shop not found' });
+    }
+    const reviews = await Review.find({ shopId: req.params.id }).sort({ createdAt: -1 }).limit(100).lean();
+    res.json({ success: true, reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// POST /api/shops/:id/reviews — Submit a review
+router.post('/:id/reviews', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, error: 'Shop not found' });
+    }
+    const { reviewerName, rating, comment } = req.body;
+    const raw = parseInt(String(rating), 10);
+    if (!reviewerName?.trim() || !Number.isFinite(raw) || raw < 1 || raw > 5) {
+      return res.status(400).json({ success: false, error: 'Name and rating (1–5) are required' });
+    }
+    const r = raw;
+    const shop = await Shop.findById(req.params.id);
+    if (!shop || !shop.isApproved || !shop.isActive) {
+      return res.status(404).json({ success: false, error: 'Shop not found' });
+    }
+    const review = new Review({
+      shopId: shop._id,
+      reviewerName: reviewerName.trim().slice(0, 80),
+      rating: r,
+      comment: (comment || '').trim().slice(0, 1500),
+    });
+    await review.save();
+    const agg = await Review.aggregate([
+      { $match: { shopId: new mongoose.Types.ObjectId(shop._id) } },
+      { $group: { _id: null, avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+    ]);
+    const row = agg[0];
+    await Shop.findByIdAndUpdate(shop._id, {
+      rating: row ? Math.min(5, Math.round(row.avg * 10) / 10) : 0,
+      totalReviews: row ? row.count : 0,
+    });
+    res.status(201).json({ success: true, review });
+  } catch (error) {
+    console.error('Review error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/:id — Public shop profile (pending/inactive hidden unless owner)
+router.get('/:id', async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id).select('-password');
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    let isOwner = false;
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer')) {
+      try {
+        const token = auth.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        isOwner = decoded.id.toString() === req.params.id;
+      } catch {
+        /* invalid token — treat as anonymous */
+      }
+    }
+
+    if ((!shop.isApproved || !shop.isActive) && !isOwner) {
+      return res.status(404).json({ success: false, error: 'Shop not found' });
+    }
+
+    res.json({ success: true, shop });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Server error' });
   }

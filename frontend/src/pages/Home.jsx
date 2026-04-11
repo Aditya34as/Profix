@@ -130,7 +130,7 @@ const Home = () => {
              <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.1s'}}>
                 <div style={{...styles.processNumber, background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))'}}>1</div>
                 <h3 style={styles.processTitle}>Register Free</h3>
-                <p style={styles.processText}>Add your business details, services offered, and shop location with geo-tagging.</p>
+                <p style={styles.processText}>Add your business details, services, and shop location (latitude & longitude from Maps) in two quick steps.</p>
              </div>
              <div className="animate-fade-in-up" style={{...styles.processStep, animationDelay: '0.2s'}}>
                 <div style={{...styles.processNumber, background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))'}}>2</div>

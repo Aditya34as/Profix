@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import SEO from '../components/SEO';
 import ShopCard from '../components/ShopCard';
-import { Search, MapPin, Filter, Loader, LocateFixed } from 'lucide-react';
+import CompareModal from '../components/CompareModal';
+import { Search, MapPin, Filter, Loader, LocateFixed, GitCompare } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -25,6 +26,21 @@ const FindServices = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState('idle'); // idle, detecting, granted, denied
   const [searchMode, setSearchMode] = useState('nearby'); // nearby, all
+  const [compareIds, setCompareIds] = useState([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const toggleCompare = (id) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const compareShops = useMemo(
+    () => shops.filter((s) => compareIds.includes(s._id)),
+    [shops, compareIds]
+  );
 
   // Read initial service from URL params
   useEffect(() => {
@@ -235,12 +251,19 @@ const FindServices = () => {
                 <Search size={16} /> {shops.length} service provider{shops.length !== 1 ? 's' : ''} found
                 {searchMode === 'nearby' ? ' near you' : ''}
               </p>
+              <p style={styles.compareHint}>
+                Tip: use <strong>Add to compare</strong> on up to 3 listings, then open the compare tray to see ratings, distance, and services side by side.
+              </p>
               <div style={styles.shopGrid}>
                 {shops.map(shop => (
                   <ShopCard
                     key={shop._id}
                     shop={shop}
                     showDistance={searchMode === 'nearby'}
+                    showCompare
+                    compareSelected={compareIds.includes(shop._id)}
+                    onCompareToggle={toggleCompare}
+                    compareDisabled={compareIds.length >= 3 && !compareIds.includes(shop._id)}
                   />
                 ))}
               </div>
@@ -258,6 +281,27 @@ const FindServices = () => {
           ) : null}
         </div>
       </section>
+
+      {compareIds.length > 0 && (
+        <div style={styles.compareBar}>
+          <span style={{ fontWeight: '700' }}>
+            <GitCompare size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+            {compareIds.length} selected for compare
+          </span>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button type="button" onClick={() => setCompareIds([])} style={styles.compareClear}>
+              Clear
+            </button>
+            <button type="button" onClick={() => setCompareOpen(true)} style={styles.compareGo}>
+              Compare now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {compareOpen && (
+        <CompareModal shops={compareShops} onClose={() => setCompareOpen(false)} />
+      )}
     </>
   );
 };
@@ -407,7 +451,47 @@ const styles = {
     fontSize: '0.95rem',
     fontWeight: '700',
     color: 'var(--color-on-surface-variant)',
-    marginBottom: '24px',
+    marginBottom: '8px',
+  },
+  compareHint: {
+    fontSize: '0.88rem',
+    color: 'var(--color-on-surface-variant)',
+    marginBottom: '20px',
+    lineHeight: 1.5,
+  },
+  compareBar: {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '16px',
+    flexWrap: 'wrap',
+    padding: '14px 24px',
+    background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))',
+    color: '#fff',
+    boxShadow: '0 -8px 32px rgba(0,0,0,0.12)',
+  },
+  compareClear: {
+    padding: '10px 16px',
+    borderRadius: '10px',
+    border: '2px solid rgba(255,255,255,0.5)',
+    background: 'transparent',
+    color: '#fff',
+    fontWeight: '700',
+    cursor: 'pointer',
+  },
+  compareGo: {
+    padding: '10px 20px',
+    borderRadius: '10px',
+    border: 'none',
+    background: '#fff',
+    color: 'var(--color-primary)',
+    fontWeight: '800',
+    cursor: 'pointer',
   },
   shopGrid: {
     display: 'grid',

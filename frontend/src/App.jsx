@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import WhatsAppFloat from './components/WhatsAppFloat';
 import ScrollReset from './components/ScrollReset';
 import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from 'sonner';
@@ -18,6 +17,7 @@ const RegisterShop = lazy(() => import('./pages/RegisterShop'));
 const LoginShop = lazy(() => import('./pages/LoginShop'));
 const ShopDashboard = lazy(() => import('./pages/ShopDashboard'));
 const ShopProfile = lazy(() => import('./pages/ShopProfile'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Branded loading spinner
@@ -59,11 +59,11 @@ function App() {
               <Route path="/login" element={<LoginShop />} />
               <Route path="/dashboard" element={<ShopDashboard />} />
               <Route path="/shop/:id" element={<ShopProfile />} />
+              <Route path="/admin" element={<AdminPanel />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </main>
-        <WhatsAppFloat />
         <ScrollToTop />
         <Toaster position="bottom-right" richColors />
         <Footer />

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Star, MessageCircle, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, ArrowRight } from 'lucide-react';
+import StarRow from './Stars';
 
 const SERVICE_LABELS = {
   'ac-repair': 'AC Repair',
@@ -12,7 +13,14 @@ const SERVICE_LABELS = {
   'pest-control': 'Pest Control'
 };
 
-const ShopCard = ({ shop, showDistance = false }) => {
+const ShopCard = ({
+  shop,
+  showDistance = false,
+  showCompare = false,
+  compareSelected = false,
+  onCompareToggle,
+  compareDisabled = false,
+}) => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   return (
@@ -35,11 +43,10 @@ const ShopCard = ({ shop, showDistance = false }) => {
         <div style={styles.headerInfo}>
           <h3 style={styles.name}>{shop.businessName}</h3>
           <div style={styles.ratingRow}>
-            <Star size={16} color="#f59e0b" fill="#f59e0b" />
-            <span style={styles.ratingText}>
-              {shop.rating > 0 ? shop.rating.toFixed(1) : 'New'} 
-              {shop.totalReviews > 0 && <span style={styles.reviewCount}>({shop.totalReviews})</span>}
-            </span>
+            <StarRow value={shop.rating || 0} size={16} showNumber={shop.rating > 0} />
+            {shop.totalReviews > 0 && (
+              <span style={styles.reviewCount}>({shop.totalReviews} reviews)</span>
+            )}
           </div>
         </div>
 
@@ -48,6 +55,18 @@ const ShopCard = ({ shop, showDistance = false }) => {
           <span style={styles.pendingBadge}>Pending</span>
         )}
       </div>
+
+      {showCompare && (
+        <label style={styles.compareLabel}>
+          <input
+            type="checkbox"
+            checked={compareSelected}
+            disabled={compareDisabled && !compareSelected}
+            onChange={() => onCompareToggle?.(shop._id)}
+          />
+          <span>Add to compare (max 3)</span>
+        </label>
+      )}
 
       {/* Distance */}
       {showDistance && shop.distance !== undefined && (
@@ -155,10 +174,21 @@ const styles = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  compareLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: 'var(--color-primary)',
+    cursor: 'pointer',
+    userSelect: 'none',
+  },
   ratingRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '4px',
+    gap: '8px',
+    flexWrap: 'wrap',
   },
   ratingText: {
     fontSize: '0.9rem',

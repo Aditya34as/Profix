@@ -4,6 +4,10 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+if (!process.env.MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not set. Copy .env.example to .env and add your MongoDB connection string.');
+}
+
 const Lead = require('./models/Lead');
 const authRoutes = require('./routes/authRoutes');
 const shopRoutes = require('./routes/shopRoutes');
@@ -51,6 +55,40 @@ app.post('/api/contact', async (req, res) => {
   } catch (error) {
     console.error('Error saving lead:', error);
     res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Reverse geocode (for registration auto-detect; avoids browser CORS to Nominatim)
+app.get('/api/geocode/reverse', async (req, res) => {
+  try {
+    const lat = parseFloat(req.query.lat);
+    const lon = parseFloat(req.query.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return res.status(400).json({ success: false, error: 'Valid lat and lon are required' });
+    }
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
+    const r = await fetch(url, {
+      headers: { 'User-Agent': 'ProFix-MERN/1.0 (https://github.com)' },
+    });
+    if (!r.ok) {
+      return res.status(502).json({ success: false, error: 'Geocoding service unavailable' });
+    }
+    const data = await r.json();
+    const a = data.address || {};
+    const street = [a.house_number, a.road].filter(Boolean).join(' ').trim()
+      || [a.neighbourhood, a.suburb].filter(Boolean).join(', ') || '';
+    const city = a.city || a.town || a.village || a.municipality || a.suburb || '';
+    const state = a.state || '';
+    const pincode = a.postcode || '';
+    res.json({
+      success: true,
+      latitude: lat,
+      longitude: lon,
+      address: { street, city, state, pincode },
+    });
+  } catch (err) {
+    console.error('Geocode error:', err);
+    res.status(500).json({ success: false, error: 'Reverse geocode failed' });
   }
 });
 
