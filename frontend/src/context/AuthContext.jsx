@@ -6,12 +6,14 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const AuthProvider = ({ children }) => {
   const [shop, setShop] = useState(null);
+  const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('profix_token'));
+  const [role, setRole] = useState(localStorage.getItem('profix_role')); // 'shop' | 'customer' | null
   const [loading, setLoading] = useState(true);
 
-  // On mount, verify token and load shop data
+  // On mount, verify token and load profile
   useEffect(() => {
-    if (token) {
+    if (token && role) {
       fetchMe();
     } else {
       setLoading(false);
@@ -20,12 +22,26 @@ export const AuthProvider = ({ children }) => {
 
   const fetchMe = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setShop(data.shop);
+      if (role === 'shop') {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setShop(data.shop);
+        } else {
+          logout();
+        }
+      } else if (role === 'customer') {
+        const res = await fetch(`${API_URL}/api/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUser(data.user);
+        } else {
+          logout();
+        }
       } else {
         logout();
       }
@@ -37,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /* ——— Shop Owner Auth ——— */
   const login = async (email, password) => {
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
@@ -46,8 +63,11 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
     if (data.success) {
       localStorage.setItem('profix_token', data.token);
+      localStorage.setItem('profix_role', 'shop');
       setToken(data.token);
+      setRole('shop');
       setShop(data.shop);
+      setUser(null);
     }
     return data;
   };
@@ -74,16 +94,60 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
     if (data.success) {
       localStorage.setItem('profix_token', data.token);
+      localStorage.setItem('profix_role', 'shop');
       setToken(data.token);
+      setRole('shop');
       setShop(data.shop);
+      setUser(null);
     }
     return data;
   };
 
+  /* ——— Customer Auth ——— */
+  const loginUser = async (email, password) => {
+    const res = await fetch(`${API_URL}/api/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('profix_token', data.token);
+      localStorage.setItem('profix_role', 'customer');
+      setToken(data.token);
+      setRole('customer');
+      setUser(data.user);
+      setShop(null);
+    }
+    return data;
+  };
+
+  const registerUser = async ({ name, email, password, phone }) => {
+    const res = await fetch(`${API_URL}/api/users/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name?.trim(), email: email?.trim(), password, phone: (phone || '').trim() })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('profix_token', data.token);
+      localStorage.setItem('profix_role', 'customer');
+      setToken(data.token);
+      setRole('customer');
+      setUser(data.user);
+      setShop(null);
+    }
+    return data;
+  };
+
+  /* ——— Shared ——— */
   const logout = () => {
     localStorage.removeItem('profix_token');
+    localStorage.removeItem('profix_role');
     setToken(null);
+    setRole(null);
     setShop(null);
+    setUser(null);
   };
 
   const updateShop = (updatedShop) => {
@@ -92,8 +156,12 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{
-      shop, token, loading, login, register, logout, updateShop, fetchMe,
+      shop, user, token, role, loading,
+      login, register, loginUser, registerUser,
+      logout, updateShop, fetchMe,
       isAuthenticated: !!token,
+      isShopOwner: role === 'shop',
+      isCustomer: role === 'customer',
       API_URL
     }}>
       {children}

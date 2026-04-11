@@ -134,8 +134,18 @@ const FindServices = () => {
         `${API_URL}/api/shops/search?lat=${userLocation.lat}&lng=${userLocation.lng}&service=${service}&radius=${radius}`
       );
       const data = await res.json();
-      if (data.success) setShops(data.shops);
-    } catch (err) { console.error('Search error:', err); }
+      if (data.success) {
+        setShops(data.shops);
+      } else {
+        // Geo-search failed — fall back to regular filtered list
+        console.warn('Geo-search failed, falling back to all shops with filter');
+        await fetchAllShops();
+      }
+    } catch (err) {
+      console.error('Search error:', err);
+      // Fall back to regular filtered list
+      await fetchAllShops();
+    }
     finally { setLoading(false); }
   };
 
@@ -156,7 +166,6 @@ const FindServices = () => {
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationStatus('granted');
-        setSearchMode('nearby');
       },
       () => setLocationStatus('denied'),
       { enableHighAccuracy: true, timeout: 10000 }

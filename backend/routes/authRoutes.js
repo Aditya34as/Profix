@@ -58,7 +58,7 @@ router.post('/register', async (req, res) => {
     await shop.save();
 
     // Generate JWT
-    const token = jwt.sign({ id: shop._id }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: shop._id, role: 'shop' }, JWT_SECRET, { expiresIn: '30d' });
 
     // Return full shop object minus password
     const shopObj = shop.toObject();
@@ -102,7 +102,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ id: shop._id }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: shop._id, role: 'shop' }, JWT_SECRET, { expiresIn: '30d' });
 
     // Return full shop object minus password
     const shopObj = shop.toObject();

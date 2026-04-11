@@ -11,6 +11,7 @@ if (!process.env.MONGODB_URI) {
 const Lead = require('./models/Lead');
 const authRoutes = require('./routes/authRoutes');
 const shopRoutes = require('./routes/shopRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -29,6 +30,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/shops', shopRoutes);
+app.use('/api/users', userRoutes);
 
 // Legacy contact route (still works for direct leads)
 app.post('/api/contact', async (req, res) => {

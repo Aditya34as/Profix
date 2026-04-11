@@ -21,7 +21,7 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Latitude and longitude are required' });
     }
 
-    const query = {
+    const geoQuery = {
       isApproved: true,
       isActive: true,
       location: {
@@ -30,36 +30,58 @@ router.get('/search', async (req, res) => {
             type: 'Point',
             coordinates: [parseFloat(lng), parseFloat(lat)]
           },
-          $maxDistance: parseInt(radius) * 1000 // Convert km to meters
+          $maxDistance: parseInt(radius) * 1000
         }
       }
     };
 
     if (service && service !== 'all') {
-      query.services = { $in: [service] };
+      geoQuery.services = { $in: [service] };
     }
 
-    const shops = await Shop.find(query)
-      .select('-password')
-      .skip(skip)
-      .limit(limit);
+    let shops;
+    let total;
+    let usedGeo = true;
 
-    // Calculate distance for each shop
+    try {
+      shops = await Shop.find(geoQuery)
+        .select('-password')
+        .skip(skip)
+        .limit(limit);
+      total = await Shop.countDocuments(geoQuery);
+    } catch (geoErr) {
+      // Geo query failed (e.g., missing 2dsphere index) — fall back to non-geo query
+      console.warn('Geo-search failed, falling back to non-geo query:', geoErr.message);
+      usedGeo = false;
+      const fallbackQuery = { isApproved: true, isActive: true };
+      if (service && service !== 'all') {
+        fallbackQuery.services = { $in: [service] };
+      }
+      shops = await Shop.find(fallbackQuery)
+        .select('-password')
+        .sort({ rating: -1, totalReviews: -1 })
+        .skip(skip)
+        .limit(limit);
+      total = await Shop.countDocuments(fallbackQuery);
+    }
+
+    // Calculate distance for each shop (only if geo query succeeded)
     const userLat = parseFloat(lat);
     const userLng = parseFloat(lng);
 
     const shopsWithDistance = shops.map(shop => {
       const shopObj = shop.toObject();
-      const [shopLng, shopLat] = shop.location.coordinates;
-      shopObj.distance = haversineDistance(userLat, userLng, shopLat, shopLng);
+      if (shop.location?.coordinates?.length === 2) {
+        const [shopLng, shopLat] = shop.location.coordinates;
+        shopObj.distance = haversineDistance(userLat, userLng, shopLat, shopLng);
+      }
       return shopObj;
     });
-
-    const total = await Shop.countDocuments(query);
 
     res.json({
       success: true,
       shops: shopsWithDistance,
+      geoAvailable: usedGeo,
       pagination: {
         page: parseInt(page),
         totalPages: Math.ceil(total / limit),
