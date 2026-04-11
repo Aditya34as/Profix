@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
-import { Settings, Wrench, ThermometerSnowflake, CheckCircle, ChevronDown, ShieldCheck, Search, MapPin, Store, ArrowRight, Users, Zap } from 'lucide-react';
+import { CheckCircle, ChevronDown, ShieldCheck, Search, MapPin, Store, ArrowRight, Users, Zap, Wind, Droplet, Thermometer, Hammer, Paintbrush, Sparkles, Bug } from 'lucide-react';
 
 const Home = () => {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -69,29 +69,63 @@ const Home = () => {
       </section>
 
       {/* Services Section */}
-      <section style={styles.servicesSection}>
+      <section id="services" style={styles.servicesSection}>
         <div className="container">
           <div className="animate-fade-in-up">
             <h2 style={{...styles.heading2, textAlign: 'center'}}>Popular Service Categories</h2>
+            <p style={{textAlign: 'center', color: 'var(--color-on-surface-variant)', fontSize: '1.1rem', marginBottom: '40px', marginTop: '-16px'}}>
+              Select a category to instantly find verified local professionals near your location.
+            </p>
             <div style={styles.servicesGrid}>
-              <Link to="/find-services?service=ac-repair" className="glass-card" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><ThermometerSnowflake size={32} color="#fff" /></div>
+              
+              <Link to="/services/ac-repair" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Wind size={28} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>AC & Cooling</h3>
-                 <p style={styles.serviceText}>Find nearby AC repair, installation, and servicing experts. Split, window, and central AC specialists.</p>
-                 <span style={styles.serviceLink}>Find AC Experts <ArrowRight size={16} /></span>
+                 <span style={styles.serviceLink}>Find Experts <ArrowRight size={14} /></span>
               </Link>
-              <Link to="/find-services?service=plumbing" className="glass-card" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><Wrench size={32} color="#fff" /></div>
-                 <h3 style={styles.serviceTitle}>Plumbing Services</h3>
-                 <p style={styles.serviceText}>Emergency plumbers near you for leaks, blockages, motor repairs, and pipe replacement.</p>
-                 <span style={styles.serviceLink}>Find Plumbers <ArrowRight size={16} /></span>
+              
+              <Link to="/services/plumbing" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Droplet size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Plumbing</h3>
+                 <span style={styles.serviceLink}>Find Plumbers <ArrowRight size={14} /></span>
               </Link>
-               <Link to="/find-services?service=water-heater" className="glass-card" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><Settings size={32} color="#fff" /></div>
-                 <h3 style={styles.serviceTitle}>Geysers & Water Heaters</h3>
-                 <p style={styles.serviceText}>Instant geyser installation, repair, and maintenance by verified local technicians.</p>
-                 <span style={styles.serviceLink}>Find Geyser Experts <ArrowRight size={16} /></span>
+               
+              <Link to="/services/geysers" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Thermometer size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Geysers</h3>
+                 <span style={styles.serviceLink}>Find Technicians <ArrowRight size={14} /></span>
               </Link>
+
+              <Link to="/find-services?service=electrical" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Zap size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Electrical</h3>
+                 <span style={styles.serviceLink}>Find Electricians <ArrowRight size={14} /></span>
+              </Link>
+
+              <Link to="/find-services?service=carpentry" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Hammer size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Carpentry</h3>
+                 <span style={styles.serviceLink}>Find Carpenters <ArrowRight size={14} /></span>
+              </Link>
+
+              <Link to="/find-services?service=painting" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Paintbrush size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Painting</h3>
+                 <span style={styles.serviceLink}>Find Painters <ArrowRight size={14} /></span>
+              </Link>
+
+              <Link to="/find-services?service=cleaning" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Sparkles size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Cleaning</h3>
+                 <span style={styles.serviceLink}>Find Cleaners <ArrowRight size={14} /></span>
+              </Link>
+
+              <Link to="/find-services?service=pest-control" className="glass-card service-card-hover" style={styles.serviceCard}>
+                 <div style={styles.iconWrapper}><Bug size={28} color="#fff" /></div>
+                 <h3 style={styles.serviceTitle}>Pest Control</h3>
+                 <span style={styles.serviceLink}>Find Exterminators <ArrowRight size={14} /></span>
+              </Link>
+
             </div>
           </div>
         </div>
@@ -364,47 +398,43 @@ const styles = {
   },
   servicesGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))',
     gap: '24px'
   },
   serviceCard: {
-    padding: 'clamp(24px, 4vw, 48px) clamp(20px, 3vw, 40px)',
+    padding: '32px 24px',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    textAlign: 'center',
     textDecoration: 'none',
     color: 'inherit',
+    borderRadius: '24px',
   },
   iconWrapper: {
     width: '64px',
     height: '64px',
-    borderRadius: '16px',
+    borderRadius: '20px',
     background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: '24px',
-    boxShadow: '0 10px 20px rgba(0, 60, 137, 0.2)'
+    marginBottom: '20px',
+    boxShadow: '0 10px 20px rgba(0, 60, 137, 0.15)'
   },
   serviceTitle: {
-    fontSize: '1.6rem',
-    marginBottom: '16px'
-  },
-  serviceText: {
-    color: 'var(--color-on-surface-variant)',
-    marginBottom: '32px',
-    lineHeight: '1.6',
-    flex: 1
+    fontSize: '1.4rem',
+    fontWeight: '800',
+    marginBottom: '12px'
   },
   serviceLink: {
     color: 'var(--color-primary)',
-    fontWeight: '800',
+    fontWeight: '700',
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    fontSize: '0.9rem'
+    gap: '6px',
+    fontSize: '0.95rem',
+    marginTop: 'auto'
   },
   processSection: {
     backgroundColor: 'var(--color-surface-container-lowest)',

@@ -1,22 +1,14 @@
 const mongoose = require('mongoose');
 
-// Full GeoJSON Point — only used when both fields are set (register or dashboard)
 const PointSchema = new mongoose.Schema(
   {
     type: {
       type: String,
       enum: ['Point'],
-      required: true,
+      default: 'Point'
     },
     coordinates: {
       type: [Number],
-      required: true,
-      validate: {
-        validator(v) {
-          return Array.isArray(v) && v.length === 2 && v.every((n) => typeof n === 'number' && Number.isFinite(n));
-        },
-        message: 'coordinates must be [longitude, latitude]',
-      },
     },
   },
   { _id: false }
@@ -59,9 +51,9 @@ const ShopSchema = new mongoose.Schema({
 });
 
 // Drop partial/invalid location (avoids "coordinates required" when type/Point was set without coords)
-ShopSchema.pre('validate', function (next) {
+ShopSchema.pre('validate', function () {
   const loc = this.location;
-  if (loc == null) return next();
+  if (loc == null) return;
   const c = loc.coordinates;
   const ok =
     Array.isArray(c) &&
@@ -70,7 +62,6 @@ ShopSchema.pre('validate', function (next) {
   if (!ok) {
     this.set('location', undefined);
   }
-  next();
 });
 
 ShopSchema.index({ location: '2dsphere' }, { sparse: true });

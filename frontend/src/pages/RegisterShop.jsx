@@ -4,6 +4,7 @@ import SEO from '../components/SEO';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { Store, ChevronRight, ChevronLeft, CheckCircle, MapPin } from 'lucide-react';
+import LocationPicker from '../components/LocationPicker';
 
 const SERVICE_OPTIONS = [
   { value: 'ac-repair', label: 'AC Repair & HVAC' },
@@ -33,6 +34,8 @@ const RegisterShop = () => {
     whatsappNumber: '',
     services: [],
     address: { street: '', city: '', state: '', pincode: '' },
+    latitude: '',
+    longitude: '',
     description: '',
     openingHours: 'Mon-Sat 8AM-8PM',
   });
@@ -263,7 +266,7 @@ const RegisterShop = () => {
                 <>
                   <h2 style={styles.stepTitle}><MapPin size={22} /> Services & details</h2>
                   <p style={styles.stepHint}>
-                    After you’re approved, sign in and open your <strong>Dashboard</strong> to drop your shop on the map so nearby customers can find you in search.
+                    Let customers know what you do and where you are located.
                   </p>
                   
                   <label style={styles.fieldLabel}>Select Services You Offer *</label>
@@ -318,6 +321,22 @@ const RegisterShop = () => {
                         />
                       </div>
                     </div>
+                  </div>
+
+                  <div style={{ marginTop: '24px' }}>
+                    <LocationPicker
+                      latitude={formData.latitude}
+                      longitude={formData.longitude}
+                      onLocationSelect={(loc) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          latitude: loc.latitude,
+                          longitude: loc.longitude,
+                          ...(loc.address && { address: { ...prev.address, ...loc.address } }),
+                        }));
+                      }}
+                      enableAutoDetect={true}
+                    />
                   </div>
 
                   <div style={{ marginTop: '24px' }}>

@@ -60,16 +60,15 @@ router.post('/register', async (req, res) => {
     // Generate JWT
     const token = jwt.sign({ id: shop._id }, JWT_SECRET, { expiresIn: '30d' });
 
+    // Return full shop object minus password
+    const shopObj = shop.toObject();
+    delete shopObj.password;
+
     res.status(201).json({
       success: true,
       message: 'Registration successful! Your shop is pending admin approval.',
       token,
-      shop: {
-        id: shop._id,
-        businessName: shop.businessName,
-        email: shop.email,
-        isApproved: shop.isApproved
-      }
+      shop: shopObj
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -105,15 +104,14 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: shop._id }, JWT_SECRET, { expiresIn: '30d' });
 
+    // Return full shop object minus password
+    const shopObj = shop.toObject();
+    delete shopObj.password;
+
     res.status(200).json({
       success: true,
       token,
-      shop: {
-        id: shop._id,
-        businessName: shop.businessName,
-        email: shop.email,
-        isApproved: shop.isApproved
-      }
+      shop: shopObj
     });
   } catch (error) {
     console.error('Login error:', error);

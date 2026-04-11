@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Phone, Menu, X, ChevronDown, Search, Store, LayoutDashboard, Shield } from 'lucide-react';
+import { Phone, Menu, X, ChevronDown, Search, Store, LayoutDashboard, Shield, Wind, Droplet, Thermometer, Zap, Hammer, Paintbrush, Sparkles, Bug } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -9,7 +9,19 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated, shop } = useAuth();
+
+  const CATEGORIES = [
+    { label: 'AC Repair', path: '/services/ac-repair', value: 'ac-repair', icon: Wind },
+    { label: 'Plumbing', path: '/services/plumbing', value: 'plumbing', icon: Droplet },
+    { label: 'Geyser/Heater', path: '/services/geysers', value: 'water-heater', icon: Thermometer },
+    { label: 'Electrical', path: '/find-services?service=electrical', value: 'electrical', icon: Zap },
+    { label: 'Carpentry', path: '/find-services?service=carpentry', value: 'carpentry', icon: Hammer },
+    { label: 'Painting', path: '/find-services?service=painting', value: 'painting', icon: Paintbrush },
+    { label: 'Cleaning', path: '/find-services?service=cleaning', value: 'cleaning', icon: Sparkles },
+    { label: 'Pest Control', path: '/find-services?service=pest-control', value: 'pest-control', icon: Bug },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,19 +110,36 @@ const Navbar = () => {
                 Categories <ChevronDown size={14} style={{marginLeft: '2px'}}/>
               </span>
               {dropdownOpen && (
-                <div style={{position: 'absolute', top: '100%', left: '-16px', backgroundColor: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', borderRadius: '12px', padding: '12px 0', minWidth: '220px', border: '1px solid var(--color-surface-container-high)', zIndex: 200}}>
-                  <Link to="/services/ac-repair" style={{display: 'block', padding: '12px 24px', color: activeSection === '/services/ac-repair' ? 'var(--color-primary)' : 'var(--color-on-surface)', fontWeight: '600', textDecoration: 'none'}}>AC Repair</Link>
-                  <Link to="/services/plumbing" style={{display: 'block', padding: '12px 24px', color: activeSection === '/services/plumbing' ? 'var(--color-primary)' : 'var(--color-on-surface)', fontWeight: '600', textDecoration: 'none'}}>Plumbing</Link>
-                  <Link to="/services/geysers" style={{display: 'block', padding: '12px 24px', color: activeSection === '/services/geysers' ? 'var(--color-primary)' : 'var(--color-on-surface)', fontWeight: '600', textDecoration: 'none'}}>Geysers</Link>
+                <div style={{position: 'absolute', top: '100%', left: '-50px', backgroundColor: '#fff', boxShadow: '0 10px 40px rgba(0,0,0,0.12)', borderRadius: '16px', padding: '16px', minWidth: '420px', border: '1px solid var(--color-surface-container-high)', zIndex: 200, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px'}}>
+                  {CATEGORIES.map((cat) => {
+                    const Icon = cat.icon;
+                    const isActive = activeSection === cat.path || location.search.includes(cat.value);
+                    return (
+                      <Link 
+                        key={cat.label} 
+                        to={cat.path} 
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', 
+                          color: isActive ? 'var(--color-primary)' : 'var(--color-on-surface)', 
+                          backgroundColor: isActive ? 'var(--color-primary-container)' : 'transparent',
+                          borderRadius: '10px', fontWeight: '600', textDecoration: 'none', transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-container-low)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isActive ? 'var(--color-primary-container)' : 'transparent'}
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '8px', background: isActive ? 'rgba(0,60,137,0.1)' : 'var(--color-surface-container)'}}>
+                          <Icon size={16} />
+                        </div>
+                        {cat.label}
+                      </Link>
+                    )
+                  })}
                 </div>
               )}
             </div>
             <a href="/#why-us" style={getNavLinkStyle('why-us')}>Why Us</a>
             <a href="/#reviews" style={getNavLinkStyle('reviews')}>Reviews</a>
-            <Link to="/admin" style={{ ...getNavLinkStyle(''), fontSize: '0.85rem', opacity: 0.85 }} title="Approve new businesses">
-              <Shield size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-              Admin
-            </Link>
           </div>
 
           {/* Action Buttons */}
@@ -151,19 +180,36 @@ const Navbar = () => {
             </Link>
 
             <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-              <p style={{fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-outline)', marginBottom: '8px'}}>Categories</p>
-              <Link to="/services/ac-repair" style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>AC Repair</Link>
-              <Link to="/services/plumbing" style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>Plumbing</Link>
-              <Link to="/services/geysers" style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>Geysers</Link>
+              <p style={{fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-outline)', marginBottom: '8px'}}>Full Categories</p>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px'}}>
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  const isActive = activeSection === cat.path || location.search.includes(cat.value);
+                  return (
+                    <Link 
+                      key={cat.label} 
+                      to={cat.path} 
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px', 
+                        padding: '16px', borderRadius: '12px',
+                        background: isActive ? 'var(--color-primary-container)' : 'var(--color-surface-container-low)',
+                        color: isActive ? 'var(--color-primary)' : 'var(--color-on-surface)',
+                        fontWeight: '700', textDecoration: 'none', border: '1px solid var(--color-surface-container)'
+                      }}
+                    >
+                      <Icon size={20} />
+                      <span style={{fontSize: '0.9rem'}}>{cat.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '24px'}}>
               <p style={{fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-outline)', marginBottom: '8px'}}>Navigation</p>
               <a href="/#why-us" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>Why Us</a>
               <a href="/#reviews" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none', borderBottom: '1px solid var(--color-surface-container)'}}>Reviews</a>
               <a href="/#faq" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-on-surface)', textDecoration: 'none'}}>FAQ</a>
-              <Link to="/admin" onClick={() => setMobileMenuOpen(false)} style={{padding: '12px 0', fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <Shield size={18} /> Admin
-              </Link>
             </div>
 
             {/* Business links */}
