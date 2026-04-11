@@ -26,7 +26,7 @@ const Footer = () => {
               <li><Link to="/find-services?service=ac-repair">AC Repair</Link></li>
               <li><Link to="/find-services?service=plumbing">Plumbing</Link></li>
               <li><Link to="/find-services?service=water-heater">Geyser / Water Heater</Link></li>
-              <li><Link to="/find-services?service=electrical">Electrical</Link></li>
+              <li><Link to="/find-services?service=cleaning">Cleaning</Link></li>
             </ul>
           </div>
 

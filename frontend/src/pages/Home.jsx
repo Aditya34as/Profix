@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
-import { CheckCircle, ChevronDown, ShieldCheck, Search, MapPin, Store, ArrowRight, Users, Zap, Wind, Droplet, Thermometer, Hammer, Paintbrush, Sparkles, Bug } from 'lucide-react';
+import { CheckCircle, ChevronDown, ShieldCheck, Search, MapPin, Store, ArrowRight, Users, Zap, Wind, Droplet, Thermometer, Sparkles } from 'lucide-react';
 
 const Home = () => {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -78,52 +78,28 @@ const Home = () => {
             </p>
             <div style={styles.servicesGrid}>
               
-              <Link to="/services/ac-repair" className="glass-card service-card-hover" style={styles.serviceCard}>
+              <Link to="/find-services?service=ac-repair" className="glass-card service-card-hover" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><Wind size={28} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>AC & Cooling</h3>
                  <span style={styles.serviceLink}>Find Experts <ArrowRight size={14} /></span>
               </Link>
               
-              <Link to="/services/plumbing" className="glass-card service-card-hover" style={styles.serviceCard}>
+              <Link to="/find-services?service=plumbing" className="glass-card service-card-hover" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><Droplet size={28} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>Plumbing</h3>
                  <span style={styles.serviceLink}>Find Plumbers <ArrowRight size={14} /></span>
               </Link>
                
-              <Link to="/services/geysers" className="glass-card service-card-hover" style={styles.serviceCard}>
+              <Link to="/find-services?service=water-heater" className="glass-card service-card-hover" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><Thermometer size={28} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>Geysers</h3>
                  <span style={styles.serviceLink}>Find Technicians <ArrowRight size={14} /></span>
-              </Link>
-
-              <Link to="/find-services?service=electrical" className="glass-card service-card-hover" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><Zap size={28} color="#fff" /></div>
-                 <h3 style={styles.serviceTitle}>Electrical</h3>
-                 <span style={styles.serviceLink}>Find Electricians <ArrowRight size={14} /></span>
-              </Link>
-
-              <Link to="/find-services?service=carpentry" className="glass-card service-card-hover" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><Hammer size={28} color="#fff" /></div>
-                 <h3 style={styles.serviceTitle}>Carpentry</h3>
-                 <span style={styles.serviceLink}>Find Carpenters <ArrowRight size={14} /></span>
-              </Link>
-
-              <Link to="/find-services?service=painting" className="glass-card service-card-hover" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><Paintbrush size={28} color="#fff" /></div>
-                 <h3 style={styles.serviceTitle}>Painting</h3>
-                 <span style={styles.serviceLink}>Find Painters <ArrowRight size={14} /></span>
               </Link>
 
               <Link to="/find-services?service=cleaning" className="glass-card service-card-hover" style={styles.serviceCard}>
                  <div style={styles.iconWrapper}><Sparkles size={28} color="#fff" /></div>
                  <h3 style={styles.serviceTitle}>Cleaning</h3>
                  <span style={styles.serviceLink}>Find Cleaners <ArrowRight size={14} /></span>
-              </Link>
-
-              <Link to="/find-services?service=pest-control" className="glass-card service-card-hover" style={styles.serviceCard}>
-                 <div style={styles.iconWrapper}><Bug size={28} color="#fff" /></div>
-                 <h3 style={styles.serviceTitle}>Pest Control</h3>
-                 <span style={styles.serviceLink}>Find Exterminators <ArrowRight size={14} /></span>
               </Link>
 
             </div>

@@ -85,22 +85,7 @@ const ContactForm = ({
           Book a service by sending your details below, or start a WhatsApp chat with this business anytime.
         </p>
       ) : null}
-      {shopId && whatsappPhone ? (
-        <a
-          href={`https://wa.me/91${String(whatsappPhone).replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(
-            `Hi${businessName ? ` ${businessName}` : ''}! I'm interested in a service via Pro Fix. `
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={styles.waCta}
-        >
-          <MessageCircle size={20} />
-          <span>
-            <strong>WhatsApp this shop</strong>
-            <span style={styles.waSub}>Fast replies for bookings & questions</span>
-          </span>
-        </a>
-      ) : null}
+
       <form onSubmit={handleSubmit} style={styles.form}>
         <input 
           type="text" 
@@ -132,11 +117,7 @@ const ContactForm = ({
           <option value="ac-repair">AC Repair</option>
           <option value="plumbing">Plumbing</option>
           <option value="water-heater">Water Heater / Geyser</option>
-          <option value="electrical">Electrical</option>
-          <option value="carpentry">Carpentry</option>
-          <option value="painting">Painting</option>
           <option value="cleaning">Cleaning</option>
-          <option value="pest-control">Pest Control</option>
         </select>
         <textarea 
           placeholder={PLACEHOLDERS[formData.serviceRequested] || PLACEHOLDERS['ac-repair']}

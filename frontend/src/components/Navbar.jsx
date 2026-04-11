@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Phone, Menu, X, ChevronDown, Search, Store, LayoutDashboard, Shield, Wind, Droplet, Thermometer, Zap, Hammer, Paintbrush, Sparkles, Bug } from 'lucide-react';
+import { Phone, Menu, X, ChevronDown, Search, Store, LayoutDashboard, Shield, Wind, Droplet, Thermometer, Sparkles } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -13,14 +13,10 @@ const Navbar = () => {
   const { isAuthenticated, shop } = useAuth();
 
   const CATEGORIES = [
-    { label: 'AC Repair', path: '/services/ac-repair', value: 'ac-repair', icon: Wind },
-    { label: 'Plumbing', path: '/services/plumbing', value: 'plumbing', icon: Droplet },
-    { label: 'Geyser/Heater', path: '/services/geysers', value: 'water-heater', icon: Thermometer },
-    { label: 'Electrical', path: '/find-services?service=electrical', value: 'electrical', icon: Zap },
-    { label: 'Carpentry', path: '/find-services?service=carpentry', value: 'carpentry', icon: Hammer },
-    { label: 'Painting', path: '/find-services?service=painting', value: 'painting', icon: Paintbrush },
+    { label: 'AC Repair', path: '/find-services?service=ac-repair', value: 'ac-repair', icon: Wind },
+    { label: 'Plumbing', path: '/find-services?service=plumbing', value: 'plumbing', icon: Droplet },
+    { label: 'Geyser/Heater', path: '/find-services?service=water-heater', value: 'water-heater', icon: Thermometer },
     { label: 'Cleaning', path: '/find-services?service=cleaning', value: 'cleaning', icon: Sparkles },
-    { label: 'Pest Control', path: '/find-services?service=pest-control', value: 'pest-control', icon: Bug },
   ];
 
   useEffect(() => {

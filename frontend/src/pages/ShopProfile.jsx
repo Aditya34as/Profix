@@ -14,11 +14,7 @@ const SERVICE_LABELS = {
   'ac-repair': 'AC Repair',
   'plumbing': 'Plumbing',
   'water-heater': 'Geyser / Water Heater',
-  'electrical': 'Electrical',
-  'carpentry': 'Carpentry',
-  'painting': 'Painting',
-  'cleaning': 'Cleaning',
-  'pest-control': 'Pest Control'
+  'cleaning': 'Cleaning'
 };
 
 const ShopProfile = () => {
@@ -157,22 +153,7 @@ const ShopProfile = () => {
                   </div>
                 </div>
 
-                {/* Contact buttons */}
-                <div style={styles.contactRow}>
-                  <a href={`tel:${shop.phone}`} style={styles.callBtn}>
-                    <Phone size={18} /> Call Now
-                  </a>
-                  {(shop.whatsappNumber || shop.phone) && (
-                    <a
-                      href={`https://wa.me/91${(shop.whatsappNumber || shop.phone).replace(/\D/g, '').slice(-10)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={styles.waBtn}
-                    >
-                      <MessageCircle size={18} /> WhatsApp
-                    </a>
-                  )}
-                </div>
+
               </div>
 
               {/* Details */}

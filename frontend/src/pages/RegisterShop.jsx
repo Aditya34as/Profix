@@ -10,11 +10,7 @@ const SERVICE_OPTIONS = [
   { value: 'ac-repair', label: 'AC Repair & HVAC' },
   { value: 'plumbing', label: 'Plumbing' },
   { value: 'water-heater', label: 'Geyser / Water Heater' },
-  { value: 'electrical', label: 'Electrical' },
-  { value: 'carpentry', label: 'Carpentry' },
-  { value: 'painting', label: 'Painting' },
   { value: 'cleaning', label: 'Cleaning' },
-  { value: 'pest-control', label: 'Pest Control' },
 ];
 
 const RegisterShop = () => {

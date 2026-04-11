@@ -539,9 +539,37 @@ html, body {
 }
 
 /* === NEW: Shop Card hover on desktop === */
+.shop-card {
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease !important;
+}
 .shop-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 16px 40px rgba(0, 30, 80, 0.1);
+}
+
+/* Pill scrollbar hide */
+.cat-bar div::-webkit-scrollbar { display: none; }
+
+/* Card entrance stagger */
+.shop-card {
+  animation: card-enter 0.4s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Call & WA button micro-hover on cards */
+.shop-card a[href^="tel"]:hover,
+.shop-card a[href*="wa.me"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.shop-card a[href*="/shop/"]:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
 }
 
 /* === NEW: Dashboard grid responsive === */
@@ -569,3 +597,4 @@ html, body {
     position: static !important;
   }
 }
+

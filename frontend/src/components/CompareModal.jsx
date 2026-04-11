@@ -5,11 +5,7 @@ const SERVICE_LABELS = {
   'ac-repair': 'AC Repair',
   plumbing: 'Plumbing',
   'water-heater': 'Geyser',
-  electrical: 'Electrical',
-  carpentry: 'Carpentry',
-  painting: 'Painting',
   cleaning: 'Cleaning',
-  'pest-control': 'Pest Control',
 };
 
 const CompareModal = ({ shops, onClose, apiBase }) => {
