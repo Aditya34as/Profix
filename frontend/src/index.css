@@ -130,22 +130,84 @@ h1, h2, h3, h4 {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
 }
 
-/* Animations */
+/* ═══════════════ SCROLL REVEAL ANIMATION SYSTEM ═══════════════ */
+
+/* Base keyframes */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(40px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes blurIn {
+  from { opacity: 0; filter: blur(12px); transform: translateY(20px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
 }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer-gradient {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
+/* ── Scroll-reveal hidden state ── */
+[data-reveal] {
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+[data-reveal="up"]    { transform: translateY(50px); }
+[data-reveal="down"]  { transform: translateY(-50px); }
+[data-reveal="left"]  { transform: translateX(-60px); }
+[data-reveal="right"] { transform: translateX(60px); }
+[data-reveal="scale"] { transform: scale(0.85); }
+[data-reveal="blur"]  { filter: blur(12px); transform: translateY(20px); }
+[data-reveal="fade"]  { /* just opacity */ }
+
+/* ── Revealed state ── */
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+  filter: blur(0);
+}
+
+/* ── Staggered delays ── */
+[data-reveal][data-delay="1"] { transition-delay: 0.1s; }
+[data-reveal][data-delay="2"] { transition-delay: 0.2s; }
+[data-reveal][data-delay="3"] { transition-delay: 0.3s; }
+[data-reveal][data-delay="4"] { transition-delay: 0.4s; }
+[data-reveal][data-delay="5"] { transition-delay: 0.5s; }
+[data-reveal][data-delay="6"] { transition-delay: 0.6s; }
+[data-reveal][data-delay="7"] { transition-delay: 0.7s; }
+[data-reveal][data-delay="8"] { transition-delay: 0.8s; }
+
+/* ── Legacy classes ── */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
@@ -572,7 +634,7 @@ html, body {
   border-color: var(--color-primary);
 }
 
-/* === NEW: Dashboard grid responsive === */
+/* === Dashboard grid responsive === */
 @media (max-width: 900px) {
   /* Stack dashboard grid */
   div[style*="grid-template-columns: 380px 1fr"] {
@@ -595,6 +657,25 @@ html, body {
   /* Register info side shouldn't be sticky on mobile */
   div[style*="position: sticky"][style*="top: 120px"] {
     position: static !important;
+  }
+}
+
+/* ===== AUTH PAGE RESPONSIVE ===== */
+/* Auth page — hide brand panel on mobile, stack layout */
+@media (max-width: 900px) {
+  .auth-brand-panel {
+    display: none !important;
+  }
+
+  div[style*="grid-template-columns: 1fr 1fr"][style*="min-height: 100vh"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Auth page — role cards stack on very small screens */
+@media (max-width: 480px) {
+  div[style*="grid-template-columns: 1fr 1fr"][style*="gap: 16px"] {
+    grid-template-columns: 1fr !important;
   }
 }
 

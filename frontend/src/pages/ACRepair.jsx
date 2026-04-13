@@ -65,7 +65,7 @@ const ACRepair = () => {
       {/* Hero Section perfectly sized to viewport */}
       <section className="service-hero-section" style={styles.heroSection}>
         <div className="container service-hero-grid" style={styles.heroGrid}>
-          <div style={styles.heroContent}>
+          <div data-reveal="left" style={styles.heroContent}>
             <div style={styles.badgeLabel}>ISO Certified Cooling Experts</div>
             <h1 style={styles.heading1}>Emergency AC Repair & Servicing</h1>
             <p style={styles.heroText}>
@@ -78,7 +78,7 @@ const ACRepair = () => {
               </a>
             </div>
           </div>
-          <div style={styles.formContainer}>
+          <div data-reveal="right" data-delay="2" style={styles.formContainer}>
             <ContactForm />
           </div>
         </div>
@@ -87,7 +87,7 @@ const ACRepair = () => {
       {/* Troubleshooting Problem Content */}
       <section style={styles.problemSection}>
         <div className="container">
-          <div className="problem-grid" style={{ padding: 'clamp(24px, 5vw, 60px)', backgroundColor: 'var(--color-surface-container-low)', borderRadius: '16px' }}>
+          <div data-reveal="up" className="problem-grid" style={{ padding: 'clamp(24px, 5vw, 60px)', backgroundColor: 'var(--color-surface-container-low)', borderRadius: '16px' }}>
             <div>
               <h2 style={styles.heading2}>Why isn't my AC Cooling?</h2>
               <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '1.1rem', marginBottom: '24px' }}>
@@ -125,14 +125,14 @@ const ACRepair = () => {
       {/* Testimonials */}
       <section style={styles.reviewSection}>
         <div className="container">
-          <h2 style={{...styles.heading2, textAlign: 'center', marginBottom: '40px'}}>NCR Relies on Pro Fix</h2>
+          <h2 data-reveal="up" style={{...styles.heading2, textAlign: 'center', marginBottom: '40px'}}>NCR Relies on Pro Fix</h2>
           <div style={styles.reviewCards}>
-            <div style={styles.reviewCard}>
+            <div data-reveal="scale" data-delay="1" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
               <p style={styles.reviewText}>"My Split AC died completely in mid-May. Pro Fix had a tech out to my apartment in South Delhi within an hour. Professional and very reasonable rates!"</p>
               <p style={styles.reviewer}>- Neha K., South Extension</p>
             </div>
-            <div style={styles.reviewCard}>
+            <div data-reveal="scale" data-delay="3" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
               <p style={styles.reviewText}>"Upfront pricing and no upselling. They quickly diagnosed the gas leak, repaired the copper piping, and recharged the refrigerant. Highly recommend."</p>
               <p style={styles.reviewer}>- Sameer S., DLF Phase 3, Gurgaon</p>

@@ -65,7 +65,7 @@ const Geyser = () => {
       {/* Hero Section perfectly sized to viewport */}
       <section className="service-hero-section" style={styles.heroSection}>
         <div className="container service-hero-grid" style={styles.heroGrid}>
-          <div style={styles.heroContent}>
+          <div data-reveal="left" style={styles.heroContent}>
             <div style={styles.badgeLabel}>All Brands Supported</div>
             <h1 style={styles.heading1}>Fast Geyser & Heater Repair</h1>
             <p style={styles.heroText}>
@@ -78,7 +78,7 @@ const Geyser = () => {
               </a>
             </div>
           </div>
-          <div style={styles.formContainer}>
+          <div data-reveal="right" data-delay="2" style={styles.formContainer}>
             <ContactForm defaultService="water-heater" />
           </div>
         </div>
@@ -87,7 +87,7 @@ const Geyser = () => {
       {/* Troubleshooting Problem Content */}
       <section style={styles.problemSection}>
         <div className="container">
-          <div className="problem-grid" style={{ padding: 'clamp(24px, 5vw, 60px)', backgroundColor: 'var(--color-surface-container-low)', borderRadius: '16px' }}>
+          <div data-reveal="up" className="problem-grid" style={{ padding: 'clamp(24px, 5vw, 60px)', backgroundColor: 'var(--color-surface-container-low)', borderRadius: '16px' }}>
             <div>
               <h2 style={styles.heading2}>Is Your Geyser Not Heating?</h2>
               <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '1.1rem', marginBottom: '24px' }}>
@@ -125,14 +125,14 @@ const Geyser = () => {
       {/* Testimonials */}
       <section style={styles.reviewSection}>
         <div className="container">
-          <h2 style={{...styles.heading2, textAlign: 'center', marginBottom: '40px'}}>NCR Relies on Pro Fix</h2>
+          <h2 data-reveal="up" style={{...styles.heading2, textAlign: 'center', marginBottom: '40px'}}>NCR Relies on Pro Fix</h2>
           <div style={styles.reviewCards}>
-            <div style={styles.reviewCard}>
+            <div data-reveal="scale" data-delay="1" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
               <p style={styles.reviewText}>"My Bajaj geyser was short-circuiting every time I turned it on. The technician replaced the dead element and safely rewired it in under an hour."</p>
               <p style={styles.reviewer}>- Swati Verma, Gurgaon</p>
             </div>
-            <div style={styles.reviewCard}>
+            <div data-reveal="scale" data-delay="3" style={styles.reviewCard}>
               <div style={styles.stars}>⭐⭐⭐⭐⭐</div>
               <p style={styles.reviewText}>"Prompt and polite service. They didn't overcharge for the thermostat and fixed the water leakage cleanly."</p>
               <p style={styles.reviewer}>- Dinesh K., South Delhi</p>

@@ -1,53 +1,90 @@
-import { Link } from 'react-router-dom';
-import { Store } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Phone, Mail, Clock, MapPin, Wind, Droplet, Thermometer, Sparkles } from 'lucide-react';
+
+const SERVICE_LINKS = [
+  { to: '/find-services?service=ac-repair', label: 'AC Repair & Servicing', icon: Wind },
+  { to: '/find-services?service=plumbing', label: 'Plumbing Solutions', icon: Droplet },
+  { to: '/find-services?service=water-heater', label: 'Geyser & Water Heater', icon: Thermometer },
+  { to: '/find-services?service=cleaning', label: 'Deep Cleaning', icon: Sparkles },
+];
 
 const Footer = () => {
+  const navigate = useNavigate();
+
+  const handleServiceClick = (to) => {
+    navigate(to);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer style={styles.footer}>
       <div className="container">
         <div style={styles.footerGrid}>
           
-          <div style={styles.col}>
-            <div style={styles.logo}>PRO FIX</div>
+          {/* Brand & Contact */}
+          <div data-reveal="up" data-delay="1" style={styles.col}>
+            <div style={styles.logo}>
+              <img src="/favicon.svg" alt="Pro Fix" style={{ width: '32px', height: '32px', borderRadius: '7px' }} />
+              <span>PRO<span style={{ fontWeight: '500', opacity: 0.7 }}> FIX</span></span>
+            </div>
             <p style={styles.footerText}>
-              India's trusted platform connecting customers with verified local home service providers. 
-              Find the nearest experts for AC repair, plumbing, and more.
+              Professional home repair & maintenance services delivered by verified, experienced technicians. Transparent pricing, guaranteed satisfaction.
             </p>
-            <p style={styles.footerContact}>
-               Helpline: <strong>+91 98765 43210</strong><br />
-               Email: info@profixindia.in
-            </p>
+            <div style={styles.contactList}>
+               <div style={styles.contactItem}>
+                 <Phone size={15} color="var(--color-primary-container)" />
+                 <span>+91 98765 43210</span>
+               </div>
+               <div style={styles.contactItem}>
+                 <Mail size={15} color="var(--color-primary-container)" />
+                 <span>info@profixindia.in</span>
+               </div>
+               <div style={styles.contactItem}>
+                 <Clock size={15} color="var(--color-primary-container)" />
+                 <span>Mon–Sun, 8 AM – 9 PM</span>
+               </div>
+               <div style={styles.contactItem}>
+                 <MapPin size={15} color="var(--color-primary-container)" />
+                 <span>Delhi NCR & Expanding</span>
+               </div>
+            </div>
           </div>
 
-          <div style={styles.col}>
-            <h4 style={styles.colTitle}>For Customers</h4>
+          {/* Services */}
+          <div data-reveal="up" data-delay="3" style={styles.col}>
+            <h4 style={styles.colTitle}>Our Services</h4>
             <ul style={styles.linkList}>
-              <li><Link to="/find-services">Find Services Near Me</Link></li>
-              <li><Link to="/find-services?service=ac-repair">AC Repair</Link></li>
-              <li><Link to="/find-services?service=plumbing">Plumbing</Link></li>
-              <li><Link to="/find-services?service=water-heater">Geyser / Water Heater</Link></li>
-              <li><Link to="/find-services?service=cleaning">Cleaning</Link></li>
+              {SERVICE_LINKS.map(({ to, label, icon: Icon }) => (
+                <li key={to}>
+                  <button onClick={() => handleServiceClick(to)} style={styles.footerLinkBtn}>
+                    <Icon size={14} /> {label}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div style={styles.col}>
-            <h4 style={styles.colTitle}>For Businesses</h4>
+          {/* Quick Links */}
+          <div data-reveal="up" data-delay="5" style={styles.col}>
+            <h4 style={styles.colTitle}>Quick Links</h4>
             <ul style={styles.linkList}>
-              <li><Link to="/register">Register Your Business</Link></li>
-              <li><Link to="/login">Shop Owner Login</Link></li>
-              <li><Link to="/dashboard">Business Dashboard</Link></li>
+              <li><Link to="/find-services">Book a Service</Link></li>
+              <li><a href="/#how-it-works">How It Works</a></li>
+              <li><a href="/#why-us">Why Choose Us</a></li>
+              <li><a href="/#reviews">Customer Reviews</a></li>
+              <li><a href="/#faq">FAQs</a></li>
             </ul>
-            <div style={styles.seoAreaBox}>
-              <Store size={18} color="var(--color-primary-container)" />
-              <span style={{fontSize: '0.85rem', color: 'var(--color-outline-variant)'}}>
-                Free registration — Join 100s of local service businesses
+            <div style={styles.promiseBox}>
+              <strong style={{color: '#fff', fontSize: '0.85rem'}}>✓ 30-Day Service Warranty</strong>
+              <span style={{fontSize: '0.8rem', color: 'var(--color-outline-variant)'}}>
+                On every repair & installation
               </span>
             </div>
           </div>
           
         </div>
         <div style={styles.footerBottom}>
-          <p>© {new Date().getFullYear()} Pro Fix India — Local Services Marketplace. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Pro Fix India — Professional Home Services. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -62,17 +99,20 @@ const styles = {
   },
   footerGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
     gap: '40px',
     marginBottom: '64px'
   },
   col: {},
   logo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
     fontSize: '1.5rem',
     fontWeight: '800',
     letterSpacing: '-0.02em',
     color: 'var(--color-primary-container)',
-    marginBottom: '24px'
+    marginBottom: '16px'
   },
   colTitle: {
     fontSize: '1.2rem',
@@ -82,11 +122,33 @@ const styles = {
   footerText: {
     color: 'var(--color-outline-variant)',
     lineHeight: '1.6',
-    marginBottom: '24px'
+    marginBottom: '20px',
+    fontSize: '0.92rem',
   },
-  footerContact: {
-    color: '#ffffff',
-    lineHeight: '1.6',
+  contactList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  contactItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: '0.9rem',
+  },
+  footerLinkBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    color: 'var(--color-primary-container)',
+    fontSize: 'inherit',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    textDecoration: 'none',
   },
   linkList: {
     listStyle: 'none',
@@ -96,14 +158,14 @@ const styles = {
     flexDirection: 'column',
     gap: '12px'
   },
-  seoAreaBox: {
+  promiseBox: {
     display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
+    flexDirection: 'column',
+    gap: '4px',
     backgroundColor: 'rgba(255,255,255,0.05)',
-    padding: '16px',
+    padding: '14px 16px',
     borderRadius: '12px',
-    border: '1px solid rgba(255,255,255,0.1)'
+    border: '1px solid rgba(255,255,255,0.1)',
   },
   footerBottom: {
     borderTop: '1px solid rgba(255,255,255,0.1)',

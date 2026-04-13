@@ -7,12 +7,12 @@ const NotFound = () => {
       <SEO title="Page Not Found" description="The page you are looking for does not exist." />
       <section style={styles.section}>
         <div className="container" style={styles.container}>
-          <div style={styles.errorCode}>404</div>
-          <h1 style={styles.heading}>Page Not Found</h1>
-          <p style={styles.text}>
+          <div data-reveal="scale" style={styles.errorCode}>404</div>
+          <h1 data-reveal="up" data-delay="1" style={styles.heading}>Page Not Found</h1>
+          <p data-reveal="up" data-delay="2" style={styles.text}>
             The page you're looking for doesn't exist or has been moved. Let's get you back on track.
           </p>
-          <div style={styles.actions}>
+          <div data-reveal="up" data-delay="3" style={styles.actions}>
             <Link to="/" className="btn-secondary" style={styles.homeBtn}>
               Back to Home
             </Link>

@@ -83,6 +83,14 @@ const FindServices = () => {
     }
   }, [setSearchParams]);
 
+  /* sync service state when URL search params change (e.g. footer/navbar link clicks) */
+  useEffect(() => {
+    const urlService = searchParams.get('service') || 'all';
+    if (urlService !== service) {
+      setService(urlService);
+    }
+  }, [searchParams]);
+
   /* Auto-detect location once on mount */
   useEffect(() => {
     if (navigator.geolocation && !hasAttemptedLocation) {
@@ -206,7 +214,7 @@ const FindServices = () => {
       {/* ═══════════ HERO ═══════════ */}
       <section style={styles.heroSection}>
         <div className="container">
-          <div className="animate-fade-in-up" style={styles.heroContent}>
+          <div data-reveal="up" style={styles.heroContent}>
             <h1 style={styles.heading1}>
               {service === 'all'
                 ? <>Find Trusted <span className="text-gradient">Service Experts</span> Near You</>

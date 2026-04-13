@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Shop = require('../models/Shop');
+const User = require('../models/User');
 const { JWT_SECRET, protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -27,6 +28,12 @@ router.post('/register', async (req, res) => {
     const existing = await Shop.findOne({ email });
     if (existing) {
       return res.status(400).json({ success: false, error: 'A shop with this email already exists' });
+    }
+
+    // Cross-collection check — prevent same email for business + customer
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, error: 'This email is already registered as a customer account. Please use a different email.' });
     }
 
     // Hash password
