@@ -13,9 +13,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@profix.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@123456';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/profix';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function seedAdmin() {
   try {
