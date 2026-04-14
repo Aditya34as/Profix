@@ -8,7 +8,7 @@ import {
   User, Mail, Lock, Phone, Store, Search, ArrowRight,
   Wrench, Shield, MapPin, Star, Eye, EyeOff,
   Wind, Droplet, Thermometer, Sparkles, CheckCircle,
-  Zap, Award, Clock
+  Zap, Award, Clock, LocateFixed, Loader
 } from 'lucide-react';
 
 /* ─── Shared input components — OUTSIDE to prevent focus loss ─── */
@@ -47,6 +47,13 @@ const SERVICE_OPTIONS = [
   { value: 'plumbing', label: 'Plumbing', icon: Droplet },
   { value: 'water-heater', label: 'Geyser/Heater', icon: Thermometer },
   { value: 'cleaning', label: 'Cleaning', icon: Sparkles },
+];
+
+const TESTIMONIALS = [
+  { name: 'Rajesh K.', city: 'Delhi', text: '"Got my AC fixed in 2 hours. Excellent service!"', rating: 5 },
+  { name: 'Priya S.', city: 'Mumbai', text: '"Best plumbing service. Very professional team."', rating: 5 },
+  { name: 'Amit P.', city: 'Bangalore', text: '"Geyser installed same day. Highly recommend!"', rating: 4 },
+  { name: 'Sneha M.', city: 'Pune', text: '"Deep cleaning was thorough. House looks brand new."', rating: 5 },
 ];
 
 /* ─── Floating particles component ─── */
@@ -118,10 +125,52 @@ const FloatingParticles = () => {
   return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1 }} />;
 };
 
+/* ─── Morphing gradient orbs ─── */
+const MorphingOrbs = () => (
+  <div style={{ position: 'absolute', inset: 0, overflow:'hidden', zIndex: 0 }}>
+    <div className="morph-orb morph-orb-1" />
+    <div className="morph-orb morph-orb-2" />
+    <div className="morph-orb morph-orb-3" />
+  </div>
+);
+
+/* ─── Live testimonial ticker ─── */
+const TestimonialTicker = () => {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
+    return () => clearInterval(interval);
+  }, []);
+  const t = TESTIMONIALS[idx];
+  return (
+    <div className="testimonial-ticker" style={{
+      padding: '16px 20px', borderRadius: '14px',
+      background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
+      backdropFilter: 'blur(10px)', marginTop: '16px', position: 'relative', zIndex: 4,
+      minHeight: '80px', transition: 'opacity 0.5s ease',
+    }}>
+      <p style={{ margin: '0 0 8px', fontSize: '0.88rem', fontStyle: 'italic', opacity: 0.9, lineHeight: 1.5 }}>{t.text}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: '700', opacity: 0.7 }}>{t.name} • {t.city}</span>
+        <span style={{ fontSize: '0.75rem', color: '#fbbf24' }}>{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</span>
+      </div>
+      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '10px' }}>
+        {TESTIMONIALS.map((_, i) => (
+          <div key={i} style={{
+            width: i === idx ? '20px' : '6px', height: '4px', borderRadius: '3px',
+            background: i === idx ? '#fff' : 'rgba(255,255,255,0.25)',
+            transition: 'all 0.4s ease',
+          }} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /* ═══════════════════════════ MAIN COMPONENT ═══════════════════════════ */
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { loginUser, registerUser, login, register, isAuthenticated, isShopOwner, isCustomer } = useAuth();
+  const { loginUser, registerUser, login, register, isAuthenticated, isShopOwner, isCustomer, isAdmin } = useAuth();
   const brandRef = useRef(null);
   const formRef = useRef(null);
   const statsRef = useRef(null);
@@ -137,7 +186,10 @@ const AuthPage = () => {
     businessName: '', ownerName: '', email: '', password: '', confirm: '',
     phone: '', whatsappNumber: '', services: [], description: '',
     address: { street: '', city: '', state: '', pincode: '' },
+    latitude: '', longitude: '',
   });
+  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [detectedAddress, setDetectedAddress] = useState('');
   const [signInForm, setSignInForm] = useState({ email: '', password: '', role: 'customer' });
 
   /* ─── GSAP Entrance Animations ─── */
@@ -151,25 +203,20 @@ const AuthPage = () => {
         .from('.auth-tagline', { y: 20, opacity: 0, duration: 0.5 }, '-=0.3')
         .from('.auth-hero-img', { scale: 1.1, opacity: 0, duration: 1 }, '-=0.4')
         .from('.auth-feature-item', { x: -40, opacity: 0, stagger: 0.12, duration: 0.5 }, '-=0.6')
-        .from('.auth-stat-item', { y: 30, opacity: 0, stagger: 0.1, duration: 0.4 }, '-=0.3');
+        .from('.auth-stat-item', { y: 30, opacity: 0, stagger: 0.1, duration: 0.4 }, '-=0.3')
+        .from('.testimonial-ticker', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2');
 
-      // Form panel
+      // Form panel — slide up + fade
       gsap.from('.auth-form-card', {
-        y: 40, opacity: 0, duration: 0.8, delay: 0.5, ease: 'power3.out'
+        y: 60, opacity: 0, duration: 1, delay: 0.3, ease: 'power3.out'
       });
 
-      // Floating badges
-      gsap.to('.floating-badge-1', {
-        y: -12, duration: 2.5, repeat: -1, yoyo: true, ease: 'sine.inOut'
-      });
-      gsap.to('.floating-badge-2', {
-        y: 10, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.5
-      });
-      gsap.to('.floating-badge-3', {
-        y: -8, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 1
+      // Logo pulse ring
+      gsap.to('.logo-pulse-ring', {
+        scale: 1.8, opacity: 0, duration: 2, repeat: -1, ease: 'power1.out'
       });
 
-      // Counter animations
+      // Counter animations with proper data
       const counters = [
         { el: '.counter-1', target: 500 },
         { el: '.counter-2', target: 10000 },
@@ -178,8 +225,8 @@ const AuthPage = () => {
       counters.forEach(({ el, target }) => {
         const element = document.querySelector(el);
         if (element) {
-          gsap.from({ val: 0 }, {
-            val: target, duration: 2, delay: 1.2, ease: 'power2.out',
+          gsap.fromTo({ val: 0 }, { val: 0 }, {
+            val: target, duration: 2.5, delay: 1, ease: 'power2.out',
             onUpdate: function () {
               const v = this.targets()[0].val;
               if (target > 100) element.textContent = Math.floor(v).toLocaleString() + '+';
@@ -194,10 +241,11 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (isShopOwner) navigate('/dashboard', { replace: true });
+      if (isAdmin) navigate('/admin', { replace: true });
+      else if (isShopOwner) navigate('/dashboard', { replace: true });
       else if (isCustomer) navigate('/find-services', { replace: true });
     }
-  }, [isAuthenticated, isShopOwner, isCustomer, navigate]);
+  }, [isAuthenticated, isShopOwner, isCustomer, isAdmin, navigate]);
 
   /* ─── Animate form transitions ─── */
   const animateFormChange = useCallback((callback) => {
@@ -399,11 +447,41 @@ const AuthPage = () => {
         }
       `}</style>
 
+      {/* Morphing orb animations */}
+      <style>{`
+        @keyframes morph1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        @keyframes morph2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(-40px, 30px) scale(1.2); }
+          66% { transform: translate(20px, -40px) scale(0.85); }
+        }
+        @keyframes morph3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(50px, 20px) scale(0.9); }
+          66% { transform: translate(-30px, -30px) scale(1.1); }
+        }
+        .morph-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.35; }
+        .morph-orb-1 { width: 300px; height: 300px; top: -60px; left: -80px; background: radial-gradient(circle, #3b82f6, transparent); animation: morph1 12s ease-in-out infinite; }
+        .morph-orb-2 { width: 250px; height: 250px; bottom: 10%; right: -40px; background: radial-gradient(circle, #06b6d4, transparent); animation: morph2 15s ease-in-out infinite; }
+        .morph-orb-3 { width: 200px; height: 200px; top: 50%; left: 30%; background: radial-gradient(circle, #8b5cf6, transparent); animation: morph3 18s ease-in-out infinite; }
+        .logo-pulse-ring {
+          position: absolute; inset: -8px; border-radius: 16px;
+          border: 2px solid rgba(99, 161, 255, 0.5); pointer-events: none;
+        }
+        @keyframes typing-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .typing-cursor { display: inline-block; width: 2px; height: 1em; background: rgba(255,255,255,0.6); margin-left: 2px; animation: typing-cursor 1s step-end infinite; vertical-align: text-bottom; }
+      `}</style>
+
       <div style={s.pageWrap}>
         <div style={s.contentWrap} className="auth-content-wrap">
 
           {/* ── Left: Premium Branding Panel ── */}
           <div style={s.brandPanel} className="auth-brand-panel">
+            <MorphingOrbs />
             <FloatingParticles />
 
             {/* Hero image with overlay */}
@@ -416,6 +494,7 @@ const AuthPage = () => {
               {/* Logo */}
               <div style={s.logoRow}>
                 <div className="auth-logo-icon" style={s.logoIconWrap}>
+                  <div className="logo-pulse-ring" />
                   <img src="/favicon.svg" alt="" style={{ width: 40, height: 40, borderRadius: 10 }} />
                 </div>
                 <div className="auth-logo-text">
@@ -449,16 +528,7 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              {/* Floating trust badges */}
-              <div className="floating-badge-1" style={{ ...s.floatingBadge, top: '15%', right: '10%' }}>
-                <Zap size={16} color="#fbbf24" /> Lightning Fast
-              </div>
-              <div className="floating-badge-2" style={{ ...s.floatingBadge, bottom: '30%', right: '5%' }}>
-                <Shield size={16} color="#22c55e" /> 100% Safe
-              </div>
-              <div className="floating-badge-3" style={{ ...s.floatingBadge, top: '50%', left: '5%' }}>
-                <Star size={16} color="#f59e0b" /> Top Rated
-              </div>
+
 
               {/* Animated Stats */}
               <div ref={statsRef} style={s.brandStats}>
@@ -477,6 +547,9 @@ const AuthPage = () => {
                   <span style={s.statLabel}>Average Rating</span>
                 </div>
               </div>
+
+              {/* Live Testimonial Ticker */}
+              <TestimonialTicker />
             </div>
           </div>
 
@@ -639,8 +712,119 @@ const AuthPage = () => {
                         value={bizForm.description} onChange={e => setBizForm(p => ({ ...p, description: e.target.value }))} />
                     </div>
 
-                    <div style={s.sectionLabel}><MapPin size={14} /> Address</div>
-                    <AuthInput label="Street" type="text" placeholder="Shop No. 5, Main Road"
+                    <div style={s.sectionLabel}><MapPin size={14} /> Address & Location</div>
+
+                    {/* Auto-detect location — primary action */}
+                    <div style={s.fieldWrap}>
+                      <p style={{ margin: '0 0 8px', fontSize: '0.85rem', color: 'var(--color-outline)', lineHeight: 1.5 }}>
+                        Tap below to auto-detect your shop's location. This sets your GPS pin for "near me" search and auto-fills your address.
+                      </p>
+                      <button
+                        type="button"
+                        disabled={detectingLocation}
+                        onClick={() => {
+                          if (!navigator.geolocation) {
+                            toast.error('Geolocation is not supported by your browser');
+                            return;
+                          }
+                          setDetectingLocation(true);
+                          setDetectedAddress('');
+                          navigator.geolocation.getCurrentPosition(
+                            async (position) => {
+                              const lat = position.coords.latitude;
+                              const lng = position.coords.longitude;
+                              let addressUpdate = {};
+                              try {
+                                const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=en`);
+                                const geo = await resp.json();
+                                setDetectedAddress(geo.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+                                if (geo.address) {
+                                  const a = geo.address;
+                                  const streetParts = [a.house_number, a.building, a.road, a.neighbourhood, a.suburb, a.hamlet, a.residential, a.locality].filter(Boolean);
+                                  const city = a.city || a.town || a.village || a.state_district || a.county || '';
+                                  let street = streetParts.join(', ');
+                                  // Fallback: if no street fields, extract from display_name
+                                  if (!street && geo.display_name) {
+                                    const parts = geo.display_name.split(',').map(p => p.trim());
+                                    // Take parts before the city/state/country (usually the first 1-3 segments)
+                                    const skipWords = [city, a.state, a.country, a.postcode, a.country_code].filter(Boolean).map(w => w.toLowerCase());
+                                    const streetFromDisplay = parts.filter(p => !skipWords.includes(p.toLowerCase())).slice(0, 2);
+                                    street = streetFromDisplay.join(', ');
+                                  }
+                                  addressUpdate = {
+                                    street,
+                                    city,
+                                    state: a.state || '',
+                                    pincode: a.postcode || '',
+                                  };
+                                }
+                              } catch {
+                                setDetectedAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+                              }
+                              setBizForm(prev => ({
+                                ...prev,
+                                latitude: String(lat),
+                                longitude: String(lng),
+                                address: { ...prev.address, ...addressUpdate },
+                              }));
+                              setDetectingLocation(false);
+                              toast.success('Location & address detected!');
+                            },
+                            (err) => {
+                              setDetectingLocation(false);
+                              if (err.code === 1) toast.error('Location permission denied. Please allow access in your browser settings.');
+                              else if (err.code === 2) toast.error('Location unavailable. Please try again.');
+                              else toast.error('Location request timed out. Please try again.');
+                            },
+                            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                          );
+                        }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                          width: '100%', padding: '14px 20px', borderRadius: '12px',
+                          border: '2px dashed var(--color-primary)',
+                          background: 'rgba(0,60,137,0.04)', color: 'var(--color-primary)',
+                          fontWeight: '700', fontSize: '0.95rem',
+                          cursor: detectingLocation ? 'wait' : 'pointer',
+                          fontFamily: 'var(--font-body)',
+                          transition: 'all 0.25s ease',
+                          opacity: detectingLocation ? 0.75 : 1,
+                        }}
+                      >
+                        {detectingLocation ? (
+                          <><Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /> Detecting your location...</>
+                        ) : (
+                          <><LocateFixed size={18} /> {bizForm.latitude ? 'Re-detect My Location' : 'Detect My Location'}</>
+                        )}
+                      </button>
+
+                      {(bizForm.latitude && bizForm.longitude) && (
+                        <div style={{
+                          display: 'flex', flexDirection: 'column', gap: '6px',
+                          padding: '12px 16px', borderRadius: '10px', marginTop: '8px',
+                          background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.2)',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <CheckCircle size={16} color="#25d366" />
+                            <strong style={{ fontSize: '0.88rem', color: '#166534' }}>Location & address detected</strong>
+                          </div>
+                          {detectedAddress && (
+                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>
+                              📍 {detectedAddress}
+                            </p>
+                          )}
+                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
+                            Coords: {parseFloat(bizForm.latitude).toFixed(5)}, {parseFloat(bizForm.longitude).toFixed(5)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Address fields — auto-filled, editable for corrections */}
+                    <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: 'var(--color-outline)', fontStyle: 'italic' }}>
+                      {bizForm.latitude ? 'Auto-filled from your location. Edit if needed.' : 'Or enter your address manually below.'}
+                    </p>
+                    <AuthInput label="Street / Area" type="text" placeholder="Shop No. 5, Main Road"
                       value={bizForm.address.street} onChange={e => setBizForm(p => ({ ...p, address: { ...p.address, street: e.target.value } }))} />
                     <div style={s.fieldRow}>
                       <AuthInput label="City" type="text" placeholder="New Delhi"
@@ -702,15 +886,17 @@ const s = {
     position: 'absolute', inset: 0, zIndex: 0,
   },
   heroImg: {
-    width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4,
-    filter: 'saturate(0.5)',
+    width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55,
+    filter: 'saturate(0.7)',
   },
   heroImgOverlay: {
     position: 'absolute', inset: 0,
-    background: 'linear-gradient(180deg, rgba(0,18,39,0.3) 0%, rgba(0,37,85,0.6) 50%, rgba(0,60,137,0.85) 100%)',
+    background: 'linear-gradient(180deg, rgba(0,18,39,0.2) 0%, rgba(0,37,85,0.35) 40%, rgba(0,60,137,0.65) 100%)',
   },
   brandInner: {
     maxWidth: '480px', color: '#fff', position: 'relative', zIndex: 3,
+    background: 'rgba(0, 20, 50, 0.35)', backdropFilter: 'blur(8px)',
+    borderRadius: '24px', padding: '32px', border: '1px solid rgba(255,255,255,0.08)',
   },
   logoRow: {
     display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '48px',
@@ -719,7 +905,7 @@ const s = {
     width: '56px', height: '56px', borderRadius: '16px',
     background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.2)', position: 'relative',
   },
   brandLogo: {
     fontSize: '2.2rem', fontWeight: '900', letterSpacing: '-0.03em', margin: 0, lineHeight: 1,

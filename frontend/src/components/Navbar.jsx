@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Menu, X, ChevronDown, Search, Store, LayoutDashboard,
-  Wind, Droplet, Thermometer, Sparkles, User, LogOut, Eye
+  Wind, Droplet, Thermometer, Sparkles, User, LogOut, Eye, Shield
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -13,7 +13,7 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const { isShopOwner, isCustomer, shop, user, logout } = useAuth();
+  const { isShopOwner, isCustomer, isAdmin, shop, user, logout } = useAuth();
 
   const CATEGORIES = [
     { label: 'AC Repair', path: '/find-services?service=ac-repair', value: 'ac-repair', icon: Wind },
@@ -168,6 +168,15 @@ const Navbar = () => {
                 )}
               </>
             )}
+
+            {isAdmin && (
+              <Link to="/admin" style={{
+                ...getNavLinkStyle('/admin'),
+                display: 'flex', alignItems: 'center', gap: '4px',
+              }}>
+                <Shield size={16} /> Admin Console
+              </Link>
+            )}
           </div>
 
           {/* ── Action area ── */}
@@ -248,6 +257,12 @@ const Navbar = () => {
                   </Link>
                 )}
               </>
+            )}
+
+            {isAdmin && (
+              <Link to="/admin" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'linear-gradient(135deg, #dc2626, #f87171)', color: '#fff', padding: '14px', borderRadius: '12px', fontWeight: '700', fontSize: '1rem', textDecoration: 'none', marginBottom: '16px' }}>
+                <Shield size={18} /> Admin Console
+              </Link>
             )}
 
             {/* Account section */}

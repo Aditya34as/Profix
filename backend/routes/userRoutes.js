@@ -88,7 +88,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role: 'customer' },
+      { id: user._id, role: user.role },
       JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -100,7 +100,7 @@ router.post('/login', async (req, res) => {
       success: true,
       token,
       user: userObj,
-      role: 'customer',
+      role: user.role,
     });
   } catch (error) {
     console.error('User login error:', error);
@@ -121,8 +121,8 @@ router.get('/me', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== 'customer') {
-      return res.status(403).json({ success: false, error: 'Not a customer account' });
+    if (!['customer', 'admin'].includes(decoded.role)) {
+      return res.status(403).json({ success: false, error: 'Not a valid user account' });
     }
 
     const user = await User.findById(decoded.id).select('-password');
@@ -130,7 +130,7 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    res.json({ success: true, user, role: 'customer' });
+    res.json({ success: true, user, role: user.role });
   } catch (error) {
     res.status(401).json({ success: false, error: 'Not authorized' });
   }

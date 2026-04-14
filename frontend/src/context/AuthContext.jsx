@@ -32,13 +32,18 @@ export const AuthProvider = ({ children }) => {
         } else {
           logout();
         }
-      } else if (role === 'customer') {
+      } else if (role === 'customer' || role === 'admin') {
         const res = await fetch(`${API_URL}/api/users/me`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
         if (data.success) {
           setUser(data.user);
+          // Update role if server says admin
+          if (data.role === 'admin' && role !== 'admin') {
+            setRole('admin');
+            localStorage.setItem('profix_role', 'admin');
+          }
         } else {
           logout();
         }
@@ -112,10 +117,11 @@ export const AuthProvider = ({ children }) => {
     });
     const data = await res.json();
     if (data.success) {
+      const userRole = data.role || 'customer'; // 'customer' or 'admin'
       localStorage.setItem('profix_token', data.token);
-      localStorage.setItem('profix_role', 'customer');
+      localStorage.setItem('profix_role', userRole);
       setToken(data.token);
-      setRole('customer');
+      setRole(userRole);
       setUser(data.user);
       setShop(null);
     }
@@ -161,7 +167,8 @@ export const AuthProvider = ({ children }) => {
       logout, updateShop, fetchMe,
       isAuthenticated: !!token,
       isShopOwner: role === 'shop',
-      isCustomer: role === 'customer',
+      isCustomer: role === 'customer' || role === 'admin',
+      isAdmin: role === 'admin',
       API_URL
     }}>
       {children}

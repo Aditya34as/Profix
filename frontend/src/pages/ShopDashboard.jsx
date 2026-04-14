@@ -5,8 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { 
   Store, MapPin, Phone, Clock, Edit3, Save, LogOut, Upload, 
-  CheckCircle, AlertCircle, Eye, Image, Star, Inbox, Activity,
-  Crosshair, Loader
+  CheckCircle, AlertCircle, Eye, Image, Star, Inbox, Activity
 } from 'lucide-react';
 import StarRow from '../components/Stars';
 
@@ -28,8 +27,7 @@ const ShopDashboard = () => {
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [detectingLocation, setDetectingLocation] = useState(false);
-  const [detectedAddress, setDetectedAddress] = useState('');
+
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -277,7 +275,7 @@ const ShopDashboard = () => {
             <div style={styles.locationNudge}>
               <MapPin size={20} />
               <span>
-                <strong>Add your map pin</strong> — In <em>Business Details</em> below, tap <strong>Edit</strong>, then click <strong>"Detect My Location"</strong> to automatically set your shop's coordinates. This is needed so customers can find you in "near me" results.
+                <strong>Location not set</strong> — Your shop coordinates were not captured during registration. Please contact support or re-register to enable "near me" search results.
               </span>
             </div>
           )}
@@ -460,100 +458,19 @@ const ShopDashboard = () => {
 
                 <div style={styles.fieldRow}>
                   <label style={styles.fieldLabel}>Shop Location (for nearby search)</label>
-                  
-                  {editing ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <button
-                        type="button"
-                        disabled={detectingLocation}
-                        onClick={async () => {
-                          if (!navigator.geolocation) {
-                            toast.error('Geolocation is not supported by your browser');
-                            return;
-                          }
-                          setDetectingLocation(true);
-                          setDetectedAddress('');
-                          navigator.geolocation.getCurrentPosition(
-                            async (position) => {
-                              const lat = position.coords.latitude;
-                              const lng = position.coords.longitude;
-                              setFormData(prev => ({
-                                ...prev,
-                                latitude: String(lat),
-                                longitude: String(lng),
-                              }));
-                              // Reverse geocode for display
-                              try {
-                                const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-                                const geo = await resp.json();
-                                setDetectedAddress(geo.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-                              } catch {
-                                setDetectedAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-                              }
-                              setDetectingLocation(false);
-                              toast.success('Location detected successfully!');
-                            },
-                            (err) => {
-                              setDetectingLocation(false);
-                              if (err.code === 1) toast.error('Location permission denied. Please allow access in your browser settings.');
-                              else if (err.code === 2) toast.error('Location unavailable. Please try again.');
-                              else toast.error('Location request timed out. Please try again.');
-                            },
-                            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-                          );
-                        }}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                          padding: '14px 20px', borderRadius: '12px', border: '2px dashed var(--color-primary)',
-                          background: 'rgba(0,60,137,0.04)', color: 'var(--color-primary)',
-                          fontWeight: '700', fontSize: '0.95rem', cursor: detectingLocation ? 'wait' : 'pointer',
-                          fontFamily: 'var(--font-body)',
-                          transition: 'all 0.25s ease',
-                        }}
-                      >
-                        {detectingLocation ? (
-                          <><Loader size={18} style={{ animation: 'spin 1s linear infinite' }} /> Detecting your location...</>
-                        ) : (
-                          <><Crosshair size={18} /> {formData.latitude ? 'Re-detect My Location' : 'Detect My Location'}</>
-                        )}
-                      </button>
-
-                      {(formData.latitude && formData.longitude) && (
-                        <div style={{
-                          display: 'flex', flexDirection: 'column', gap: '6px',
-                          padding: '12px 16px', borderRadius: '10px',
-                          background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.2)',
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <CheckCircle size={16} color="#25d366" />
-                            <strong style={{ fontSize: '0.88rem', color: '#166534' }}>Location set</strong>
-                          </div>
-                          {detectedAddress && (
-                            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-on-surface-variant)', lineHeight: 1.4 }}>
-                              📍 {detectedAddress}
-                            </p>
-                          )}
-                          <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
-                            Coords: {parseFloat(formData.latitude).toFixed(5)}, {parseFloat(formData.longitude).toFixed(5)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div>
-                      {(formData?.latitude && formData?.longitude) ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: 'var(--color-on-surface)' }}>
-                          <CheckCircle size={16} color="#25d366" />
-                          <span>Location set — {parseFloat(formData.latitude).toFixed(5)}, {parseFloat(formData.longitude).toFixed(5)}</span>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#94a3b8' }}>
-                          <AlertCircle size={16} />
-                          <span>No location set — click Edit to detect</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div>
+                    {(formData?.latitude && formData?.longitude) ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: 'var(--color-on-surface)' }}>
+                        <CheckCircle size={16} color="#25d366" />
+                        <span>Location set — {parseFloat(formData.latitude).toFixed(5)}, {parseFloat(formData.longitude).toFixed(5)}</span>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#94a3b8' }}>
+                        <AlertCircle size={16} />
+                        <span>No location set — location is captured during registration</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {editing && (

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Shop = require('../models/Shop');
 const Lead = require('../models/Lead');
 const Review = require('../models/Review');
-const { protect, adminOnly, JWT_SECRET } = require('../middleware/authMiddleware');
+const { protect, protectUser, requireAdmin, JWT_SECRET } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
@@ -215,7 +215,7 @@ router.post('/me/upload', protect, upload.single('image'), async (req, res) => {
 // --- Admin routes (before /:id so paths like /admin are not captured as ids) ---
 
 // GET /api/shops/admin/pending — List pending shops (admin)
-router.get('/admin/pending', adminOnly, async (req, res) => {
+router.get('/admin/pending', protectUser, requireAdmin, async (req, res) => {
   try {
     const shops = await Shop.find({ isApproved: false })
       .select('-password')
@@ -227,7 +227,7 @@ router.get('/admin/pending', adminOnly, async (req, res) => {
 });
 
 // PUT /api/shops/:id/approve — Admin approve/reject a shop
-router.put('/:id/approve', adminOnly, async (req, res) => {
+router.put('/:id/approve', protectUser, requireAdmin, async (req, res) => {
   try {
     const { approved } = req.body;
     const shop = await Shop.findByIdAndUpdate(

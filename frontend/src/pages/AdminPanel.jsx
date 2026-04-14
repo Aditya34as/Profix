@@ -1,47 +1,37 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import SEO from '../components/SEO';
-import { Shield, CheckCircle, XCircle, Loader, ArrowLeft, MapPin } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, Loader, ArrowLeft, MapPin, AlertTriangle } from 'lucide-react';
 
-const STORAGE_KEY = 'profix_admin_key';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const AdminPanel = () => {
-  const [keyInput, setKeyInput] = useState('');
-  const [adminKey, setAdminKey] = useState(() => sessionStorage.getItem(STORAGE_KEY) || '');
+  const { token, isAdmin, isAuthenticated, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [actionId, setActionId] = useState(null);
 
-  const saveKey = (e) => {
-    e.preventDefault();
-    const k = keyInput.trim();
-    if (!k) return;
-    sessionStorage.setItem(STORAGE_KEY, k);
-    setAdminKey(k);
-    setError('');
-  };
-
-  const clearKey = useCallback(() => {
-    sessionStorage.removeItem(STORAGE_KEY);
-    setAdminKey('');
-    setKeyInput('');
-    setShops([]);
-  }, []);
+  // Redirect non-admins
+  useEffect(() => {
+    if (!authLoading && (!isAuthenticated || !isAdmin)) {
+      navigate('/auth', { replace: true });
+    }
+  }, [authLoading, isAuthenticated, isAdmin, navigate]);
 
   const fetchPending = useCallback(async () => {
-    if (!adminKey) return;
+    if (!token) return;
     setLoading(true);
     setError('');
     try {
       const res = await fetch(`${API_URL}/api/shops/admin/pending`, {
-        headers: { 'x-admin-key': adminKey },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await res.json();
-      if (res.status === 403) {
-        setError('Invalid admin key.');
-        clearKey(); // Drop back to login
+      if (res.status === 401 || res.status === 403) {
+        setError('Access denied. You do not have admin privileges.');
         return;
       }
       if (data.success) setShops(data.shops || []);
@@ -51,11 +41,11 @@ const AdminPanel = () => {
     } finally {
       setLoading(false);
     }
-  }, [adminKey, clearKey]);
+  }, [token]);
 
   useEffect(() => {
-    if (adminKey) fetchPending();
-  }, [adminKey, fetchPending]);
+    if (token && isAdmin) fetchPending();
+  }, [token, isAdmin, fetchPending]);
 
   const setApproval = async (id, approved) => {
     setActionId(id);
@@ -64,7 +54,7 @@ const AdminPanel = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': adminKey,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ approved }),
       });
@@ -81,24 +71,35 @@ const AdminPanel = () => {
     }
   };
 
-  // The hidden gate
-  if (!adminKey) {
+  // Show nothing while auth is loading
+  if (authLoading) {
     return (
       <div style={styles.gatePage}>
-        <form onSubmit={saveKey} style={styles.gateForm}>
-          <input
-            type="password"
-            value={keyInput}
-            onChange={(e) => setKeyInput(e.target.value)}
-            placeholder="System Access"
-            style={styles.gateInput}
-            autoFocus
-          />
-          <button type="submit" style={styles.gateBtn}>
-            Enter
-          </button>
-        </form>
-        {error && <p style={styles.gateError}>{error}</p>}
+        <Loader size={32} className="spin" style={{ color: 'var(--color-primary)' }} />
+        <style>{`.spin{animation:spin 0.8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
+  }
+
+  // Access denied for non-admins
+  if (!isAdmin) {
+    return (
+      <div style={styles.gatePage}>
+        <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+          <AlertTriangle size={48} color="#dc2626" style={{ marginBottom: '16px' }} />
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '8px', color: '#1e293b' }}>Access Denied</h2>
+          <p style={{ color: '#64748b', marginBottom: '24px' }}>
+            You do not have admin privileges. Please sign in with an admin account.
+          </p>
+          <Link to="/auth" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '12px 24px', borderRadius: '10px',
+            backgroundColor: 'var(--color-primary)', color: '#fff',
+            fontWeight: '700', textDecoration: 'none',
+          }}>
+            Go to Sign In
+          </Link>
+        </div>
       </div>
     );
   }
@@ -112,9 +113,6 @@ const AdminPanel = () => {
             <Link to="/" style={styles.back}>
               <ArrowLeft size={16} /> Exit Admin
             </Link>
-            <button onClick={clearKey} style={styles.ghostBtn}>
-              Logout
-            </button>
           </div>
 
           <div style={styles.hero}>
@@ -138,7 +136,7 @@ const AdminPanel = () => {
             {loading && shops.length === 0 ? (
               <p style={styles.muted}>Loading…</p>
             ) : shops.length === 0 ? (
-              <p style={styles.muted}>No pending shops. You’re all caught up.</p>
+              <p style={styles.muted}>No pending shops. You're all caught up.</p>
             ) : (
               <ul style={styles.list}>
                 {shops.map((s) => (
@@ -195,34 +193,6 @@ const styles = {
     justifyContent: 'center',
     backgroundColor: '#ffffff',
   },
-  gateForm: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-  },
-  gateInput: {
-    padding: '12px 16px',
-    borderRadius: '6px',
-    border: '1px solid #e5e7eb',
-    fontSize: '1rem',
-    outline: 'none',
-    width: '240px',
-  },
-  gateBtn: {
-    padding: '12px 24px',
-    borderRadius: '6px',
-    backgroundColor: '#111827',
-    color: '#ffffff',
-    border: 'none',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
-  gateError: {
-    marginTop: '16px',
-    color: '#dc2626',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-  },
   page: {
     padding: 'clamp(32px, 5vw, 64px) 0',
     backgroundColor: 'var(--color-surface)',
@@ -249,15 +219,6 @@ const styles = {
   h2: { 
     fontSize: '1.15rem', 
     margin: 0,
-  },
-  ghostBtn: {
-    padding: '8px 16px',
-    border: '1px solid var(--color-outline-variant)',
-    background: 'transparent',
-    borderRadius: '8px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
   },
   refresh: {
     display: 'inline-flex',

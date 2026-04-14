@@ -70,9 +70,10 @@ const ShopOnly = ({ children }) => {
 
 // Guest only — redirects authenticated users to their home
 const GuestOnly = ({ children }) => {
-  const { isAuthenticated, isShopOwner, isCustomer, loading } = useAuth();
+  const { isAuthenticated, isShopOwner, isCustomer, isAdmin, loading } = useAuth();
   if (loading) return <LoadingFallback />;
   if (isAuthenticated) {
+    if (isAdmin) return <Navigate to="/admin" replace />;
     if (isShopOwner) return <Navigate to="/dashboard" replace />;
     if (isCustomer) return <Navigate to="/find-services" replace />;
   }
