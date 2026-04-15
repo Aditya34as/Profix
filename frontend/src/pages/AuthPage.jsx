@@ -6,9 +6,9 @@ import { toast } from 'sonner';
 import gsap from 'gsap';
 import {
   User, Mail, Lock, Phone, Store, Search, ArrowRight,
-  Wrench, Shield, MapPin, Star, Eye, EyeOff,
+  Wrench, MapPin, Eye, EyeOff,
   Wind, Droplet, Thermometer, Sparkles, CheckCircle,
-  Zap, Award, Clock, LocateFixed, Loader
+  LocateFixed, Loader
 } from 'lucide-react';
 
 /* ─── Shared input components — OUTSIDE to prevent focus loss ─── */
@@ -49,132 +49,11 @@ const SERVICE_OPTIONS = [
   { value: 'cleaning', label: 'Cleaning', icon: Sparkles },
 ];
 
-const TESTIMONIALS = [
-  { name: 'Rajesh K.', city: 'Delhi', text: '"Got my AC fixed in 2 hours. Excellent service!"', rating: 5 },
-  { name: 'Priya S.', city: 'Mumbai', text: '"Best plumbing service. Very professional team."', rating: 5 },
-  { name: 'Amit P.', city: 'Bangalore', text: '"Geyser installed same day. Highly recommend!"', rating: 4 },
-  { name: 'Sneha M.', city: 'Pune', text: '"Deep cleaning was thorough. House looks brand new."', rating: 5 },
-];
-
-/* ─── Floating particles component ─── */
-const FloatingParticles = () => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animId;
-    let particles = [];
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth * 2;
-      canvas.height = canvas.offsetHeight * 2;
-      ctx.scale(2, 2);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    // Create particles
-    for (let i = 0; i < 40; i++) {
-      particles.push({
-        x: Math.random() * canvas.offsetWidth,
-        y: Math.random() * canvas.offsetHeight,
-        size: Math.random() * 3 + 1,
-        speedX: (Math.random() - 0.5) * 0.3,
-        speedY: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.4 + 0.1,
-      });
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-      particles.forEach(p => {
-        p.x += p.speedX;
-        p.y += p.speedY;
-        if (p.x < 0) p.x = canvas.offsetWidth;
-        if (p.x > canvas.offsetWidth) p.x = 0;
-        if (p.y < 0) p.y = canvas.offsetHeight;
-        if (p.y > canvas.offsetHeight) p.y = 0;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(163, 194, 255, ${p.opacity})`;
-        ctx.fill();
-      });
-
-      // Draw connections
-      particles.forEach((a, i) => {
-        particles.slice(i + 1).forEach(b => {
-          const dist = Math.hypot(a.x - b.x, a.y - b.y);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(163, 194, 255, ${0.06 * (1 - dist / 120)})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        });
-      });
-      animId = requestAnimationFrame(animate);
-    };
-    animate();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
-  }, []);
-
-  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1 }} />;
-};
-
-/* ─── Morphing gradient orbs ─── */
-const MorphingOrbs = () => (
-  <div style={{ position: 'absolute', inset: 0, overflow:'hidden', zIndex: 0 }}>
-    <div className="morph-orb morph-orb-1" />
-    <div className="morph-orb morph-orb-2" />
-    <div className="morph-orb morph-orb-3" />
-  </div>
-);
-
-/* ─── Live testimonial ticker ─── */
-const TestimonialTicker = () => {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
-    return () => clearInterval(interval);
-  }, []);
-  const t = TESTIMONIALS[idx];
-  return (
-    <div className="testimonial-ticker" style={{
-      padding: '16px 20px', borderRadius: '14px',
-      background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
-      backdropFilter: 'blur(10px)', marginTop: '16px', position: 'relative', zIndex: 4,
-      minHeight: '80px', transition: 'opacity 0.5s ease',
-    }}>
-      <p style={{ margin: '0 0 8px', fontSize: '0.88rem', fontStyle: 'italic', opacity: 0.9, lineHeight: 1.5 }}>{t.text}</p>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.78rem', fontWeight: '700', opacity: 0.7 }}>{t.name} • {t.city}</span>
-        <span style={{ fontSize: '0.75rem', color: '#fbbf24' }}>{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</span>
-      </div>
-      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '10px' }}>
-        {TESTIMONIALS.map((_, i) => (
-          <div key={i} style={{
-            width: i === idx ? '20px' : '6px', height: '4px', borderRadius: '3px',
-            background: i === idx ? '#fff' : 'rgba(255,255,255,0.25)',
-            transition: 'all 0.4s ease',
-          }} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
 /* ═══════════════════════════ MAIN COMPONENT ═══════════════════════════ */
 const AuthPage = () => {
   const navigate = useNavigate();
   const { loginUser, registerUser, login, register, isAuthenticated, isShopOwner, isCustomer, isAdmin } = useAuth();
-  const brandRef = useRef(null);
   const formRef = useRef(null);
-  const statsRef = useRef(null);
-  const featuresRef = useRef(null);
 
   const [mode, setMode] = useState('signin');
   const [role, setRole] = useState(null);
@@ -192,48 +71,80 @@ const AuthPage = () => {
   const [detectedAddress, setDetectedAddress] = useState('');
   const [signInForm, setSignInForm] = useState({ email: '', password: '', role: 'customer' });
 
-  /* ─── GSAP Entrance Animations ─── */
+  /* ─── GSAP Entrance + ambient motion ─── */
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Brand panel animations
+      gsap.fromTo(
+        '.auth-brand-photo',
+        { scale: 1.14, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 1.35, ease: 'power3.out' }
+      );
+      gsap.to('.auth-brand-photo', {
+        scale: 1.045,
+        duration: 14,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: 1.2,
+      });
+
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('.auth-brand-mark', { opacity: 0, y: -18, scale: 0.92, duration: 0.55 }, 0.2)
+        .fromTo(
+          '.auth-brand-headline',
+          { y: 36, opacity: 0, filter: 'blur(10px)' },
+          { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.82, ease: 'power3.out' },
+          '-=0.12'
+        )
+        .from('.auth-brand-sub', { y: 22, opacity: 0, duration: 0.62 }, '-=0.38')
+        .from('.auth-brand-metric-part', { y: 14, opacity: 0, duration: 0.38, stagger: 0.085 }, '-=0.28');
 
-      tl.from('.auth-logo-icon', { scale: 0, rotation: -180, duration: 0.8, delay: 0.2 })
-        .from('.auth-logo-text', { x: -30, opacity: 0, duration: 0.6 }, '-=0.4')
-        .from('.auth-tagline', { y: 20, opacity: 0, duration: 0.5 }, '-=0.3')
-        .from('.auth-hero-img', { scale: 1.1, opacity: 0, duration: 1 }, '-=0.4')
-        .from('.auth-feature-item', { x: -40, opacity: 0, stagger: 0.12, duration: 0.5 }, '-=0.6')
-        .from('.auth-stat-item', { y: 30, opacity: 0, stagger: 0.1, duration: 0.4 }, '-=0.3')
-        .from('.testimonial-ticker', { y: 20, opacity: 0, duration: 0.5 }, '-=0.2');
-
-      // Form panel — slide up + fade
-      gsap.from('.auth-form-card', {
-        y: 60, opacity: 0, duration: 1, delay: 0.3, ease: 'power3.out'
-      });
-
-      // Logo pulse ring
-      gsap.to('.logo-pulse-ring', {
-        scale: 1.8, opacity: 0, duration: 2, repeat: -1, ease: 'power1.out'
-      });
-
-      // Counter animations with proper data
-      const counters = [
-        { el: '.counter-1', target: 500 },
-        { el: '.counter-2', target: 10000 },
-        { el: '.counter-3', target: 4.8 },
-      ];
-      counters.forEach(({ el, target }) => {
-        const element = document.querySelector(el);
-        if (element) {
-          gsap.fromTo({ val: 0 }, { val: 0 }, {
-            val: target, duration: 2.5, delay: 1, ease: 'power2.out',
-            onUpdate: function () {
+      // Animated counters (subtle, production-style)
+      const animateCounter = (selector, target, options = {}) => {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        const cfg = {
+          duration: options.duration ?? 1.8,
+          delay: options.delay ?? 0.55,
+          decimals: options.decimals ?? 0,
+          prefix: options.prefix ?? '',
+          suffix: options.suffix ?? '',
+          format: options.format ?? ((v) => v),
+        };
+        gsap.fromTo(
+          { val: 0 },
+          { val: target },
+          {
+            duration: cfg.duration,
+            delay: cfg.delay,
+            ease: 'power2.out',
+            onUpdate() {
               const v = this.targets()[0].val;
-              if (target > 100) element.textContent = Math.floor(v).toLocaleString() + '+';
-              else element.textContent = v.toFixed(1) + '★';
+              const n = cfg.decimals ? Number(v).toFixed(cfg.decimals) : String(Math.round(v));
+              el.textContent = `${cfg.prefix}${cfg.format(n)}${cfg.suffix}`;
             }
-          });
-        }
+          }
+        );
+      };
+
+      animateCounter('.auth-metric-counter-1', 500, { suffix: '+', format: (n) => Number(n).toLocaleString() });
+      animateCounter('.auth-metric-counter-2', 10000, { suffix: '+', format: (n) => Number(n).toLocaleString() });
+      animateCounter('.auth-metric-counter-3', 4.8, { decimals: 1 });
+
+      // Gentle looping accent on metrics row (keeps page feeling "alive")
+      gsap.to('.auth-brand-metrics', {
+        opacity: 0.85,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: 1.6,
+      });
+
+      // Keep motion minimal: entrance + counters only
+
+      gsap.from('.auth-form-card', {
+        y: 32, opacity: 0, duration: 0.9, delay: 0.08, ease: 'power3.out',
       });
     });
     return () => ctx.revert();
@@ -324,9 +235,7 @@ const AuthPage = () => {
       const isCustomer = newRole === 'customer';
       gsap.to(pill, {
         x: isCustomer ? 0 : container.offsetWidth / 2,
-        background: isCustomer
-          ? 'linear-gradient(135deg, #003c89, #1a53ad)'
-          : 'linear-gradient(135deg, #b12d00, #e84d1a)',
+        background: isCustomer ? '#003c89' : '#b12d00',
         duration: 0.35,
         ease: 'power3.out',
       });
@@ -369,6 +278,11 @@ const AuthPage = () => {
           100% { transform: scale(1.5); opacity: 0; }
         }
         .auth-form-card { transition: transform 0.3s ease; }
+        @keyframes auth-grid-drift {
+          0% { background-position: 0 0, 0 0; }
+          100% { background-position: 72px 72px, 72px 72px; }
+        }
+        /* keep motion GSAP-driven (cleaner, smoother) */
         .form-input-auth:focus {
           border-color: var(--color-primary) !important;
           box-shadow: 0 0 0 4px rgba(0,60,137,0.08) !important;
@@ -404,9 +318,9 @@ const AuthPage = () => {
           width: calc(50% - 4px);
           height: calc(100% - 8px);
           border-radius: 11px;
-          background: linear-gradient(135deg, #003c89, #1a53ad);
+          background: #003c89;
           z-index: 1;
-          box-shadow: 0 4px 12px rgba(0,30,80,0.2);
+          box-shadow: 0 1px 3px rgba(0,30,80,0.12);
         }
         .role-slider-btn {
           flex: 1;
@@ -440,128 +354,120 @@ const AuthPage = () => {
         .auth-form-panel::-webkit-scrollbar-track { background: transparent; }
         .auth-form-panel::-webkit-scrollbar-thumb { background: rgba(0,30,80,0.1); border-radius: 3px; }
         .auth-form-panel::-webkit-scrollbar-thumb:hover { background: rgba(0,30,80,0.2); }
+        .auth-brand-photo-wrap {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          overflow: hidden;
+        }
+        .auth-brand-photo {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: 68% center;
+          will-change: transform, opacity;
+        }
+        .auth-brand-scrim {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background:
+            linear-gradient(102deg, rgba(3, 7, 18, 0.86) 0%, rgba(5, 12, 28, 0.62) 40%, rgba(8, 20, 45, 0.38) 100%),
+            radial-gradient(ellipse 90% 70% at 80% 20%, rgba(37, 99, 235, 0.2), transparent 58%);
+          pointer-events: none;
+        }
+        .auth-brand-glow {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          background:
+            radial-gradient(ellipse 55% 45% at 20% 10%, rgba(59, 130, 246, 0.2), transparent 55%),
+            radial-gradient(ellipse 40% 35% at 85% 75%, rgba(34, 211, 238, 0.12), transparent 50%);
+          pointer-events: none;
+        }
+        .auth-brand-grid {
+          position: absolute;
+          inset: 0;
+          z-index: 3;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+          background-size: 72px 72px;
+          animation: auth-grid-drift 48s linear infinite;
+          mask-image: radial-gradient(ellipse 95% 85% at 40% 40%, black 18%, transparent 68%);
+          pointer-events: none;
+          opacity: 0.85;
+        }
+        .auth-mobile-brand { display: none; align-items: center; gap: 10px; }
         @media (max-width: 900px) {
           .auth-content-wrap { grid-template-columns: 1fr !important; }
           .auth-brand-panel { display: none !important; }
           .auth-form-panel { padding: 24px 16px !important; }
+          .auth-mobile-brand { display: flex !important; }
         }
-      `}</style>
-
-      {/* Morphing orb animations */}
-      <style>{`
-        @keyframes morph1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        @keyframes morph2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-40px, 30px) scale(1.2); }
-          66% { transform: translate(20px, -40px) scale(0.85); }
-        }
-        @keyframes morph3 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(50px, 20px) scale(0.9); }
-          66% { transform: translate(-30px, -30px) scale(1.1); }
-        }
-        .morph-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.35; }
-        .morph-orb-1 { width: 300px; height: 300px; top: -60px; left: -80px; background: radial-gradient(circle, #3b82f6, transparent); animation: morph1 12s ease-in-out infinite; }
-        .morph-orb-2 { width: 250px; height: 250px; bottom: 10%; right: -40px; background: radial-gradient(circle, #06b6d4, transparent); animation: morph2 15s ease-in-out infinite; }
-        .morph-orb-3 { width: 200px; height: 200px; top: 50%; left: 30%; background: radial-gradient(circle, #8b5cf6, transparent); animation: morph3 18s ease-in-out infinite; }
-        .logo-pulse-ring {
-          position: absolute; inset: -8px; border-radius: 16px;
-          border: 2px solid rgba(99, 161, 255, 0.5); pointer-events: none;
-        }
-        @keyframes typing-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        .typing-cursor { display: inline-block; width: 2px; height: 1em; background: rgba(255,255,255,0.6); margin-left: 2px; animation: typing-cursor 1s step-end infinite; vertical-align: text-bottom; }
       `}</style>
 
       <div style={s.pageWrap}>
         <div style={s.contentWrap} className="auth-content-wrap">
 
-          {/* ── Left: Premium Branding Panel ── */}
+          {/* ── Left: editorial brand (Linear / Vercel–style) ── */}
           <div style={s.brandPanel} className="auth-brand-panel">
-            <MorphingOrbs />
-            <FloatingParticles />
-
-            {/* Hero image with overlay */}
-            <div className="auth-hero-img" style={s.heroImgWrap}>
-              <img src="/auth_hero.png" alt="" style={s.heroImg} />
-              <div style={s.heroImgOverlay} />
+            <div className="auth-brand-photo-wrap" aria-hidden>
+              <img className="auth-brand-photo" src="/auth_hero.png" alt="" />
+              <div className="auth-brand-scrim" />
             </div>
-
-            <div style={s.brandInner}>
-              {/* Logo */}
-              <div style={s.logoRow}>
-                <div className="auth-logo-icon" style={s.logoIconWrap}>
-                  <div className="logo-pulse-ring" />
-                  <img src="/favicon.svg" alt="" style={{ width: 40, height: 40, borderRadius: 10 }} />
-                </div>
-                <div className="auth-logo-text">
-                  <h1 style={s.brandLogo}>PRO FIX</h1>
-                  <p className="auth-tagline" style={s.brandTagline}>Professional Home Services</p>
-                </div>
+            <div className="auth-brand-glow" aria-hidden />
+            <div className="auth-brand-grid" aria-hidden />
+            <div style={s.brandContent}>
+              <div className="auth-brand-mark" style={s.brandMark}>
+                <img src="/favicon.svg" alt="" width={36} height={36} style={{ borderRadius: 10 }} />
+                <span style={s.brandMarkText}>Pro Fix</span>
               </div>
-
-              {/* Features with animated entrance */}
-              <div ref={featuresRef} style={s.brandFeatures}>
-                <div className="auth-feature-item" style={s.featureItem}>
-                  <div style={s.featureIcon}><Shield size={20} /></div>
-                  <div>
-                    <strong>Verified Professionals</strong>
-                    <p style={s.featureText}>Every technician is background-checked & skill-certified</p>
-                  </div>
-                </div>
-                <div className="auth-feature-item" style={s.featureItem}>
-                  <div style={{ ...s.featureIcon, background: 'rgba(34, 197, 94, 0.15)', borderColor: 'rgba(34, 197, 94, 0.25)' }}><Clock size={20} /></div>
-                  <div>
-                    <strong>Fast Response Time</strong>
-                    <p style={s.featureText}>Expert at your door within 1–2 hours of booking</p>
-                  </div>
-                </div>
-                <div className="auth-feature-item" style={s.featureItem}>
-                  <div style={{ ...s.featureIcon, background: 'rgba(251, 191, 36, 0.15)', borderColor: 'rgba(251, 191, 36, 0.25)' }}><Award size={20} /></div>
-                  <div>
-                    <strong>30-Day Warranty</strong>
-                    <p style={s.featureText}>Guaranteed satisfaction on every repair & installation</p>
-                  </div>
-                </div>
-              </div>
-
-
-
-              {/* Animated Stats */}
-              <div ref={statsRef} style={s.brandStats}>
-                <div className="auth-stat-item" style={s.statItem}>
-                  <strong className="counter-1" style={s.statNumber}>500+</strong>
-                  <span style={s.statLabel}>Verified Experts</span>
-                </div>
-                <div style={s.statDivider} />
-                <div className="auth-stat-item" style={s.statItem}>
-                  <strong className="counter-2" style={s.statNumber}>10,000+</strong>
-                  <span style={s.statLabel}>Happy Customers</span>
-                </div>
-                <div style={s.statDivider} />
-                <div className="auth-stat-item" style={s.statItem}>
-                  <strong className="counter-3" style={s.statNumber}>4.8★</strong>
-                  <span style={s.statLabel}>Average Rating</span>
-                </div>
-              </div>
-
-              {/* Live Testimonial Ticker */}
-              <TestimonialTicker />
+              <h2 className="auth-brand-headline" style={s.brandHeadline}>
+                Book trusted home services in minutes.
+              </h2>
+              <p className="auth-brand-sub" style={s.brandSub}>
+                From AC repair to plumbing—get background‑verified pros, upfront pricing, and 1–2 hour response times. Every job backed by our 30‑day warranty.
+              </p>
+              <p className="auth-brand-metrics" style={s.brandMetrics}>
+                <span className="auth-brand-metric-part" style={s.brandMetric}>
+                  <strong className="auth-metric-counter-1">0</strong> experts
+                </span>
+                <span className="auth-brand-metric-part auth-brand-metric-sep" style={s.brandMetricSep}>·</span>
+                <span className="auth-brand-metric-part" style={s.brandMetric}>
+                  <strong className="auth-metric-counter-2">0</strong> jobs
+                </span>
+                <span className="auth-brand-metric-part auth-brand-metric-sep" style={s.brandMetricSep}>·</span>
+                <span className="auth-brand-metric-part" style={s.brandMetric}>
+                  <strong className="auth-metric-counter-3">0.0</strong> avg rating
+                </span>
+              </p>
             </div>
           </div>
 
-          {/* ── Right: Auth Form ── */}
+          {/* ── Right: auth column ── */}
           <div style={s.formPanel} className="auth-form-panel">
+            <div className="auth-mobile-brand" style={s.mobileBrand}>
+              <img src="/favicon.svg" alt="" width={28} height={28} style={{ borderRadius: 8 }} />
+              <span style={s.mobileBrandText}>Pro Fix</span>
+            </div>
             <div ref={formRef} style={s.formCard} className="auth-form-card">
               <div className="auth-form-inner">
-
-                {/* Tabs */}
-                <div style={s.tabBar}>
-                  <button onClick={() => animateFormChange(() => { setMode('signin'); setRole(null); })} style={mode === 'signin' ? s.tabActive : s.tab}>Sign In</button>
-                  <button onClick={() => animateFormChange(() => { setMode('signup'); setRole(null); })} style={mode === 'signup' ? s.tabActive : s.tab}>Create Account</button>
+                <div style={s.modeTabs}>
+                  <button
+                    type="button"
+                    onClick={() => animateFormChange(() => { setMode('signin'); setRole(null); })}
+                    style={mode === 'signin' ? s.modeTabOn : s.modeTabOff}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => animateFormChange(() => { setMode('signup'); setRole(null); })}
+                    style={mode === 'signup' ? s.modeTabOn : s.modeTabOff}
+                  >
+                    Create account
+                  </button>
                 </div>
 
                 {/* ─── SIGN IN ─── */}
@@ -592,12 +498,10 @@ const AuthPage = () => {
 
                     </div>
 
-                    <button type="submit" className="btn-secondary" style={{
+                    <button type="submit" style={{
                       ...s.submitBtn,
-                      background: signInForm.role === 'customer'
-                        ? 'linear-gradient(135deg, #003c89, #1a53ad)'
-                        : 'linear-gradient(135deg, #b12d00, #e84d1a)',
-                      transition: 'background 0.4s ease',
+                      background: signInForm.role === 'customer' ? '#003c89' : '#b12d00',
+                      color: '#fff',
                     }} disabled={submitting}>
                       {submitting ? (
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -660,7 +564,7 @@ const AuthPage = () => {
                       <AuthPasswordInput label="Confirm" placeholder="Repeat password" showPwd={showPwd} onToggle={togglePwd}
                         value={custForm.confirm} onChange={e => setCustForm(p => ({ ...p, confirm: e.target.value }))} />
                     </div>
-                    <button type="submit" className="btn-secondary" style={s.submitBtn} disabled={submitting}>
+                    <button type="submit" style={{ ...s.submitBtn, background: '#003c89', color: '#fff' }} disabled={submitting}>
                       {submitting ? (
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                           <span style={s.spinner} /> Creating Account...
@@ -841,7 +745,7 @@ const AuthPage = () => {
                         value={bizForm.confirm} onChange={e => setBizForm(p => ({ ...p, confirm: e.target.value }))} />
                     </div>
 
-                    <button type="submit" className="btn-secondary" style={s.submitBtn} disabled={submitting}>
+                    <button type="submit" style={{ ...s.submitBtn, background: '#003c89', color: '#fff' }} disabled={submitting}>
                       {submitting ? (
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                           <span style={s.spinner} /> Registering...
@@ -876,129 +780,89 @@ const s = {
     display: 'grid', gridTemplateColumns: '1.1fr 1fr', height: '100vh', position: 'relative', zIndex: 2,
   },
 
-  /* ── Brand Panel ── */
+  /* ── Brand column (editorial, SaaS-style) ── */
   brandPanel: {
-    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 48px',
-    background: 'linear-gradient(160deg, #001227 0%, #002555 40%, #003c89 100%)',
+    display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
+    padding: 'clamp(48px, 8vw, 96px) clamp(40px, 6vw, 80px)',
+    background: '#070b14',
     position: 'relative', overflow: 'hidden',
   },
-  heroImgWrap: {
-    position: 'absolute', inset: 0, zIndex: 0,
+  brandContent: {
+    position: 'relative', zIndex: 4, maxWidth: '460px',
   },
-  heroImg: {
-    width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55,
-    filter: 'saturate(0.7)',
+  brandMark: {
+    display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px',
   },
-  heroImgOverlay: {
-    position: 'absolute', inset: 0,
-    background: 'linear-gradient(180deg, rgba(0,18,39,0.2) 0%, rgba(0,37,85,0.35) 40%, rgba(0,60,137,0.65) 100%)',
+  brandMarkText: {
+    fontSize: '1rem', fontWeight: '700', color: 'rgba(248, 250, 252, 0.95)', letterSpacing: '-0.02em',
   },
-  brandInner: {
-    maxWidth: '480px', color: '#fff', position: 'relative', zIndex: 3,
-    background: 'rgba(0, 20, 50, 0.35)', backdropFilter: 'blur(8px)',
-    borderRadius: '24px', padding: '32px', border: '1px solid rgba(255,255,255,0.08)',
+  brandHeadline: {
+    fontSize: 'clamp(2rem, 3.2vw, 2.75rem)', fontWeight: '600', lineHeight: 1.12, letterSpacing: '-0.038em',
+    color: '#f8fafc', margin: '0 0 20px', willChange: 'filter',
   },
-  logoRow: {
-    display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '48px',
+  brandSub: {
+    fontSize: '1.05rem', lineHeight: 1.65, color: 'rgba(226, 232, 240, 0.7)', margin: '0 0 32px',
   },
-  logoIconWrap: {
-    width: '56px', height: '56px', borderRadius: '16px',
-    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.2)', position: 'relative',
+  brandMetrics: {
+    display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px 2px',
+    fontSize: '0.875rem', color: 'rgba(226, 232, 240, 0.5)', margin: 0, lineHeight: 1.5,
   },
-  brandLogo: {
-    fontSize: '2.2rem', fontWeight: '900', letterSpacing: '-0.03em', margin: 0, lineHeight: 1,
-    background: 'linear-gradient(135deg, #fff, #a3c2ff)',
-    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-  },
-  brandTagline: {
-    fontSize: '0.9rem', opacity: 0.7, margin: '4px 0 0', fontWeight: '500', letterSpacing: '0.02em',
-  },
-  brandFeatures: {
-    display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '40px',
-  },
-  featureItem: { display: 'flex', alignItems: 'flex-start', gap: '16px' },
-  featureIcon: {
-    width: '44px', height: '44px', borderRadius: '12px',
-    background: 'rgba(99, 161, 255, 0.15)', border: '1px solid rgba(99, 161, 255, 0.25)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  },
-  featureText: { margin: '4px 0 0', fontSize: '0.85rem', opacity: 0.6, lineHeight: 1.4 },
-  floatingBadge: {
-    position: 'absolute', zIndex: 4,
-    display: 'flex', alignItems: 'center', gap: '8px',
-    padding: '10px 16px', borderRadius: '50px',
-    background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255,255,255,0.12)',
-    fontSize: '0.78rem', fontWeight: '700', color: '#fff',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-  },
-  brandStats: {
-    display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 24px',
-    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px',
-    backdropFilter: 'blur(10px)',
-  },
-  statItem: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-    flex: 1, textAlign: 'center',
-  },
-  statNumber: { fontSize: '1.4rem', fontWeight: '900', lineHeight: 1 },
-  statLabel: { fontSize: '0.72rem', opacity: 0.6, fontWeight: '500' },
-  statDivider: { width: '1px', height: '40px', background: 'rgba(255,255,255,0.12)' },
+  brandMetric: { letterSpacing: '0.01em' },
+  brandMetricSep: { padding: '0 8px', opacity: 0.45, userSelect: 'none' },
 
-  /* ── Form Panel ── */
+  /* ── Auth column ── */
   formPanel: {
-    display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-    padding: '24px 32px', overflowY: 'auto', height: '100vh',
-    background: 'linear-gradient(180deg, #f8faff 0%, #fff 100%)',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+    padding: '40px 48px 56px', overflowY: 'auto', height: '100vh',
+    background: '#f4f5f7',
+    borderLeft: '1px solid rgba(15, 23, 42, 0.07)',
     scrollbarWidth: 'thin',
-    scrollbarColor: 'rgba(0,30,80,0.1) transparent',
+    scrollbarColor: 'rgba(0,30,80,0.12) transparent',
+  },
+  mobileBrand: {
+    width: '100%', maxWidth: '440px', marginBottom: '4px',
+  },
+  mobileBrandText: {
+    fontSize: '1rem', fontWeight: '700', color: '#0f172a', letterSpacing: '-0.02em',
   },
   formCard: {
-    width: '100%', maxWidth: '520px',
-    background: '#fff',
-    border: '1px solid rgba(0,30,80,0.06)',
-    borderRadius: '24px',
-    padding: 'clamp(24px, 3vw, 36px)',
-    boxShadow: '0 24px 80px rgba(0,30,80,0.06), 0 4px 16px rgba(0,0,0,0.03)',
-    margin: 'auto 0',
+    width: '100%', maxWidth: '440px',
+    background: 'transparent',
+    border: 'none', borderRadius: 0, padding: 0, boxShadow: 'none', margin: '8px 0 auto',
   },
-  tabBar: {
-    display: 'flex', gap: '4px',
-    background: '#f1f5f9', borderRadius: '14px', padding: '4px', marginBottom: '28px',
+  modeTabs: {
+    display: 'flex', gap: '32px', marginBottom: '28px', borderBottom: '1px solid rgba(15,23,42,0.08)',
   },
-  tab: {
-    flex: 1, padding: '12px 16px', borderRadius: '11px', border: 'none',
-    background: 'transparent', color: '#64748b', fontWeight: '700', fontSize: '0.92rem',
-    cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.25s ease',
+  modeTabOn: {
+    padding: '0 0 14px', marginBottom: '-1px', border: 'none', background: 'none',
+    borderBottom: '2px solid var(--color-primary)', color: '#0f172a', fontWeight: '700',
+    fontSize: '0.9375rem', cursor: 'pointer', fontFamily: 'var(--font-body)',
   },
-  tabActive: {
-    flex: 1, padding: '12px 16px', borderRadius: '11px', border: 'none',
-    background: '#fff', color: 'var(--color-primary)', fontWeight: '800', fontSize: '0.92rem',
-    cursor: 'pointer', fontFamily: 'var(--font-body)',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)', transition: 'all 0.25s ease',
+  modeTabOff: {
+    padding: '0 0 14px', marginBottom: '-1px', border: 'none', background: 'none',
+    borderBottom: '2px solid transparent', color: '#94a3b8', fontWeight: '600',
+    fontSize: '0.9375rem', cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'color 0.2s',
   },
-  form: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  formTitle: { fontSize: '1.6rem', fontWeight: '800', margin: '0 0 2px', letterSpacing: '-0.02em', color: '#0f172a' },
-  formSubtitle: { color: '#64748b', margin: '0 0 8px', fontSize: '0.95rem' },
+  form: { display: 'flex', flexDirection: 'column', gap: '14px' },
+  formTitle: { fontSize: '1.5rem', fontWeight: '700', margin: '4px 0 0', letterSpacing: '-0.03em', color: '#0f172a' },
+  formSubtitle: { color: '#64748b', margin: '0 0 18px', fontSize: '0.9375rem', lineHeight: 1.5 },
   fieldWrap: { display: 'flex', flexDirection: 'column', gap: '4px' },
   fieldRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' },
   label: { display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '700', fontSize: '0.82rem', color: '#475569' },
   inputWrap: { position: 'relative' },
   input: {
-    width: '100%', padding: '11px 14px', borderRadius: '10px',
-    border: '2px solid #e2e8f0', backgroundColor: '#f8fafc',
-    fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: '#0f172a',
-    outline: 'none', transition: 'all 0.3s ease', boxSizing: 'border-box',
+    width: '100%', padding: '11px 14px', borderRadius: '8px',
+    border: '1px solid rgba(15,23,42,0.12)', backgroundColor: '#fff',
+    fontFamily: 'var(--font-body)', fontSize: '0.9375rem', color: '#0f172a',
+    outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s', boxSizing: 'border-box',
   },
   eyeBtn: {
     position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
     background: 'none', border: 'none', padding: '4px', color: '#94a3b8', cursor: 'pointer',
   },
   submitBtn: {
-    padding: '15px', borderRadius: '14px', fontSize: '1rem', fontWeight: '800',
-    marginTop: '8px', border: 'none', cursor: 'pointer', letterSpacing: '0.01em',
+    padding: '12px 16px', borderRadius: '8px', fontSize: '0.9375rem', fontWeight: '700',
+    marginTop: '6px', border: 'none', cursor: 'pointer', letterSpacing: '0.01em',
     position: 'relative', overflow: 'hidden',
   },
   spinner: {
@@ -1033,9 +897,10 @@ const s = {
   roleCards: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', margin: '8px 0' },
   roleCard: {
     padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center',
-    textAlign: 'center', cursor: 'pointer', border: '2px solid #e2e8f0',
-    borderRadius: '20px', background: '#fff',
+    textAlign: 'center', cursor: 'pointer', border: '1px solid rgba(15,23,42,0.1)',
+    borderRadius: '12px', background: '#fff',
     fontFamily: 'var(--font-body)', width: '100%',
+    boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
   },
   roleCardIcon: {
     width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(0,60,137,0.06)',

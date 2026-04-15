@@ -257,7 +257,7 @@ const styles = {
   heroOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(5, 15, 30, 0.7)',
+    background: 'linear-gradient(180deg, rgba(5, 15, 30, 0.45) 0%, rgba(5, 20, 40, 0.58) 100%)',
     zIndex: 1
   },
   heroContainer: {
@@ -271,13 +271,11 @@ const styles = {
     alignItems: 'center',
   },
   heroGlassContent: {
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'linear-gradient(165deg, rgba(8, 28, 58, 0.78) 0%, rgba(5, 22, 48, 0.85) 100%)',
+    border: '1px solid rgba(255,255,255,0.14)',
     padding: '40px',
     borderRadius: '24px',
-    boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
+    boxShadow: '0 30px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
   },
   eyebrow: {
     color: '#a3c2ff',
