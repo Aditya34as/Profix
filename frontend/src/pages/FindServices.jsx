@@ -186,9 +186,10 @@ const FindServices = () => {
   return (
     <>
       <SEO
-        title={`${activeCat?.label || 'Services'} Near You | Pro Fix`}
-        description="Find trusted AC repair, plumbing, and home service experts near you."
-        keywords="services near me, AC repair near me, plumber near me, local services India"
+        title={`${activeCat?.label || 'Home Services'} Near You — Verified Pros in Delhi NCR | Pro Fix India`}
+        description={`Find the best ${(activeCat?.label || 'home service').toLowerCase()} professionals near your location. Pro Fix India connects you with 500+ verified, rated experts in Delhi, Gurgaon, Noida & NCR. Compare ratings, read reviews, and book instantly. 30-day warranty on all services.`}
+        keywords={`${(activeCat?.label || 'home services').toLowerCase()} near me, best ${(activeCat?.label || 'services').toLowerCase()} Delhi NCR, verified ${(activeCat?.label || 'service').toLowerCase()} professionals, affordable ${(activeCat?.label || 'home repair').toLowerCase()}, book ${(activeCat?.label || 'service').toLowerCase()} online India, same day ${(activeCat?.label || 'service').toLowerCase()}, emergency ${(activeCat?.label || 'repair').toLowerCase()} near me`}
+        url={`https://www.profixindia.in/find-services${service !== 'all' ? `?service=${service}` : ''}`}
       />
 
       {/* Skeleton keyframes */}

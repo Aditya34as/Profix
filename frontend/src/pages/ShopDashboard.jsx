@@ -243,16 +243,8 @@ const ShopDashboard = () => {
               </div>
               <p style={styles.dashboardBlurb}>
                 <strong>Profile &amp; gallery</strong> — how you look to customers. <strong>Leads</strong> — form requests from your public page.
-                <strong> Reviews</strong> — feedback left on your listing. Approve listings in <Link to="/admin" style={{ color: 'var(--color-primary)', fontWeight: 700 }}>Admin</Link> if you run the platform.
+                <strong> Reviews</strong> — feedback left on your listing.
               </p>
-            </div>
-            <div style={styles.headerActions}>
-              <Link to={`/shop/${shop?._id}`} style={styles.previewBtn}>
-                <Eye size={16} /> View Public Profile
-              </Link>
-              <button onClick={handleLogout} style={styles.logoutBtn}>
-                <LogOut size={16} /> Logout
-              </button>
             </div>
           </div>
 
@@ -274,9 +266,40 @@ const ShopDashboard = () => {
           {shop && !shop.location?.coordinates?.length && (
             <div style={styles.locationNudge}>
               <MapPin size={20} />
-              <span>
-                <strong>Location not set</strong> — Your shop coordinates were not captured during registration. Please contact support or re-register to enable "near me" search results.
-              </span>
+              <div style={{ flex: 1 }}>
+                <span>
+                  <strong>Location not set</strong> — Your shop won't appear in "near me" search results.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!navigator.geolocation) { toast.error('Geolocation not supported'); return; }
+                    toast.info('Detecting your shop location...');
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          latitude: String(pos.coords.latitude),
+                          longitude: String(pos.coords.longitude),
+                        }));
+                        if (!editing) setEditing(true);
+                        toast.success('Location detected! Click Save to apply.');
+                      },
+                      (err) => toast.error(err.code === 1 ? 'Location access denied — enable it in browser settings' : 'Location detection failed'),
+                      { enableHighAccuracy: true, timeout: 15000 }
+                    );
+                  }}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 16px', borderRadius: '8px', marginTop: '10px',
+                    border: '1.5px solid var(--color-primary)', background: 'rgba(0,60,137,0.06)',
+                    color: 'var(--color-primary)', fontWeight: '700', fontSize: '0.85rem',
+                    cursor: 'pointer', fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  <MapPin size={14} /> Detect My Location
+                </button>
+              </div>
             </div>
           )}
 
@@ -456,22 +479,7 @@ const ShopDashboard = () => {
                   </div>
                 </div>
 
-                <div style={styles.fieldRow}>
-                  <label style={styles.fieldLabel}>Shop Location (for nearby search)</label>
-                  <div>
-                    {(formData?.latitude && formData?.longitude) ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: 'var(--color-on-surface)' }}>
-                        <CheckCircle size={16} color="#25d366" />
-                        <span>Location set — {parseFloat(formData.latitude).toFixed(5)}, {parseFloat(formData.longitude).toFixed(5)}</span>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#94a3b8' }}>
-                        <AlertCircle size={16} />
-                        <span>No location set — location is captured during registration</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+
 
                 {editing && (
                   <div style={styles.fieldRow}>
