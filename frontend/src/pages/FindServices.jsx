@@ -11,11 +11,11 @@ import {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const CATEGORIES = [
-  { value: 'all',          label: 'All Services',   icon: LayoutGrid },
-  { value: 'ac-repair',    label: 'AC Repair',      icon: Wind },
-  { value: 'plumbing',     label: 'Plumbing',       icon: Droplet },
-  { value: 'water-heater', label: 'Geyser',         icon: Thermometer },
-  { value: 'cleaning',     label: 'Cleaning',       icon: Sparkles },
+  { value: 'all', label: 'All Services', icon: LayoutGrid },
+  { value: 'ac-repair', label: 'AC Repair', icon: Wind },
+  { value: 'plumbing', label: 'Plumbing', icon: Droplet },
+  { value: 'water-heater', label: 'Geyser', icon: Thermometer },
+  { value: 'cleaning', label: 'Cleaning', icon: Sparkles },
 ];
 
 /* ————— Skeleton placeholder while loading ————— */
@@ -279,11 +279,10 @@ const FindServices = () => {
                     onChange={(e) => setRadius(parseInt(e.target.value))}
                     style={styles.radiusSelect}
                   >
+                    <option value={1}>1 km</option>
+                    <option value={2}>2 km</option>
                     <option value={5}>5 km</option>
                     <option value={10}>10 km</option>
-                    <option value={15}>15 km</option>
-                    <option value={25}>25 km</option>
-                    <option value={50}>50 km</option>
                   </select>
                 </div>
               )}
@@ -328,7 +327,7 @@ const FindServices = () => {
                 <div style={{ ...sk.line, width: '180px', height: '14px' }} />
               </div>
               <div style={styles.shopGrid}>
-                {[1,2,3,4,5,6].map(i => <SkeletonCard key={i} />)}
+                {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
               </div>
             </>
           ) : shops.length > 0 ? (
