@@ -206,9 +206,15 @@ const FindServices = () => {
           0%,100% { transform: translateY(0); }
           40%     { transform: translateY(-6px); }
         }
+
+        /* ─── Mobile Responsive ─── */
         @media (max-width: 768px) {
-          .cat-bar { padding: 0 16px !important; }
-          .sticky-controls { top: 60px !important; }
+          .cat-bar { padding: 0 12px !important; }
+          .sticky-controls { top: 56px !important; padding: 8px 0 !important; }
+        }
+        @media (max-width: 480px) {
+          .cat-bar { padding: 0 8px !important; gap: 6px !important; }
+          .sticky-controls { top: 52px !important; }
         }
       `}</style>
 
@@ -283,6 +289,10 @@ const FindServices = () => {
                     <option value={2}>2 km</option>
                     <option value={5}>5 km</option>
                     <option value={10}>10 km</option>
+                    <option value={15}>15 km</option>
+                    <option value={25}>25 km</option>
+                    <option value={50}>50 km</option>
+                    <option value={100}>100 km</option>
                   </select>
                 </div>
               )}
@@ -367,12 +377,26 @@ const FindServices = () => {
                 No providers found in your area for this category. Try increasing the search radius.
               </p>
               <div style={styles.emptyActions}>
-                <button onClick={() => setRadius(50)} style={styles.emptyBtn}>
-                  Extend to 50 km
-                </button>
-                <button onClick={() => changeService('all')} style={styles.emptyBtnOutline}>
-                  Show All Categories
-                </button>
+                {userLocation && radius < 50 && (
+                  <button onClick={() => setRadius(50)} style={styles.emptyBtn}>
+                    Extend to 50 km
+                  </button>
+                )}
+                {userLocation && radius < 100 && radius >= 50 && (
+                  <button onClick={() => setRadius(100)} style={styles.emptyBtn}>
+                    Extend to 100 km
+                  </button>
+                )}
+                {service !== 'all' && (
+                  <button onClick={() => { changeService('all'); setRadius(userLocation ? 25 : 15); }} style={styles.emptyBtnOutline}>
+                    Show All Categories
+                  </button>
+                )}
+                {!userLocation && (
+                  <button onClick={detectLocation} style={styles.emptyBtn}>
+                    📍 Enable Location
+                  </button>
+                )}
               </div>
             </div>
           )}
