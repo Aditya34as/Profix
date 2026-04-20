@@ -289,10 +289,6 @@ const FindServices = () => {
                     <option value={2}>2 km</option>
                     <option value={5}>5 km</option>
                     <option value={10}>10 km</option>
-                    <option value={15}>15 km</option>
-                    <option value={25}>25 km</option>
-                    <option value={50}>50 km</option>
-                    <option value={100}>100 km</option>
                   </select>
                 </div>
               )}
@@ -377,18 +373,13 @@ const FindServices = () => {
                 No providers found in your area for this category. Try increasing the search radius.
               </p>
               <div style={styles.emptyActions}>
-                {userLocation && radius < 50 && (
-                  <button onClick={() => setRadius(50)} style={styles.emptyBtn}>
-                    Extend to 50 km
-                  </button>
-                )}
-                {userLocation && radius < 100 && radius >= 50 && (
-                  <button onClick={() => setRadius(100)} style={styles.emptyBtn}>
-                    Extend to 100 km
+                {userLocation && radius < 10 && (
+                  <button onClick={() => setRadius(10)} style={styles.emptyBtn}>
+                    Extend to 10 km
                   </button>
                 )}
                 {service !== 'all' && (
-                  <button onClick={() => { changeService('all'); setRadius(userLocation ? 25 : 15); }} style={styles.emptyBtnOutline}>
+                  <button onClick={() => { changeService('all'); setRadius(10); }} style={styles.emptyBtnOutline}>
                     Show All Categories
                   </button>
                 )}
