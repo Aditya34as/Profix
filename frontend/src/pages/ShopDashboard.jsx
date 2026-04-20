@@ -28,6 +28,38 @@ const ShopDashboard = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
+  // Delete shop state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteShop = async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch(`${API_URL}/api/shops/me`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Shop deleted successfully');
+        logout();
+        navigate('/auth');
+      } else {
+        setDeleteError(data.error || 'Delete failed');
+      }
+    } catch {
+      setDeleteError('Request failed. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -638,8 +670,120 @@ const ShopDashboard = () => {
               </div>
             )}
           </div>
+
+          {/* ── Danger Zone — Delete Shop ── */}
+          <div className="glass-card" style={{
+            padding: '24px', marginTop: '40px',
+            border: '1px solid #fecaca', borderRadius: '16px',
+            background: '#fefefe',
+          }}>
+            <h3 style={{ ...styles.sectionTitle, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={18} color="#dc2626" /> Danger Zone
+            </h3>
+            <p style={{ margin: '8px 0 16px', fontSize: '0.92rem', color: 'var(--color-on-surface-variant)', lineHeight: 1.5 }}>
+              Permanently delete your shop account and all associated data (reviews, leads). This action <strong>cannot be undone</strong>.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '10px 20px', borderRadius: '10px',
+                border: '2px solid #dc2626', background: '#fef2f2',
+                color: '#dc2626', fontWeight: '700', fontSize: '0.9rem',
+                cursor: 'pointer', fontFamily: 'var(--font-body)',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}
+            >
+              <AlertCircle size={16} /> Delete My Shop
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <>
+          <style>{`
+            @keyframes dmodal-fade { from { opacity:0; transform:scale(.95) } to { opacity:1; transform:scale(1) } }
+          `}</style>
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '16px',
+          }}>
+            <div style={{
+              background: '#fff', borderRadius: '20px', padding: '32px 28px',
+              maxWidth: '420px', width: '100%',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.3)',
+              animation: 'dmodal-fade 0.25s ease-out',
+            }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <div style={{
+                  width: '56px', height: '56px', borderRadius: '50%',
+                  background: '#fef2f2', border: '2px solid #fecaca',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 16px', fontSize: '24px',
+                }}>🗑️</div>
+                <h3 style={{ margin: '0 0 8px', fontSize: '1.2rem', fontWeight: '800', color: '#0f172a' }}>
+                  Delete Your Shop?
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', lineHeight: 1.5 }}>
+                  This will permanently delete <strong>{shop?.businessName}</strong>, all your reviews, and all leads.
+                  Enter your password to confirm.
+                </p>
+              </div>
+
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="form-input-auth"
+                style={{
+                  width: '100%', padding: '12px 16px', borderRadius: '10px',
+                  border: '2px solid #e2e8f0', fontSize: '0.95rem',
+                  marginBottom: '8px', fontFamily: 'var(--font-body)',
+                  outline: 'none',
+                }}
+                autoFocus
+              />
+              {deleteError && (
+                <p style={{ color: '#dc2626', fontSize: '0.85rem', fontWeight: '600', margin: '4px 0 8px' }}>{deleteError}</p>
+              )}
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                <button
+                  onClick={handleDeleteShop}
+                  disabled={deleting || !deletePassword}
+                  style={{
+                    flex: 1, padding: '12px 16px', borderRadius: '12px',
+                    border: 'none', background: '#dc2626', color: '#fff',
+                    fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer',
+                    fontFamily: 'var(--font-body)', opacity: deleting || !deletePassword ? 0.5 : 1,
+                  }}
+                >
+                  {deleting ? 'Deleting…' : 'Delete Permanently'}
+                </button>
+                <button
+                  onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }}
+                  style={{
+                    flex: 1, padding: '12px 16px', borderRadius: '12px',
+                    border: '1.5px solid #e2e8f0', background: 'transparent',
+                    color: '#475569', fontWeight: '700', fontSize: '0.9rem',
+                    cursor: 'pointer', fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

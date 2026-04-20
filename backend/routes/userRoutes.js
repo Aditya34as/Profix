@@ -136,4 +136,54 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// GET /api/users/admin/all — List all customers (admin only)
+router.get('/admin/all', async (req, res) => {
+  try {
+    // Auth check
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Not authorized' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const admin = await User.findById(decoded.id);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Admin access required' });
+    }
+
+    const { search, page = 1 } = req.query;
+    const limit = 20;
+    const skip = (parseInt(page) - 1) * limit;
+    const query = { role: 'customer' };
+
+    if (search) {
+      query.$or = [
+        { name: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { phone: new RegExp(search, 'i') },
+      ];
+    }
+
+    const users = await User.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+      success: true,
+      users,
+      pagination: { page: parseInt(page), totalPages: Math.ceil(total / limit), total },
+    });
+  } catch (error) {
+    console.error('Admin list users error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -5,6 +5,7 @@ const Shop = require('../models/Shop');
 const Lead = require('../models/Lead');
 const Review = require('../models/Review');
 const { protect, protectUser, requireAdmin, JWT_SECRET } = require('../middleware/authMiddleware');
+const User = require('../models/User');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
@@ -244,6 +245,207 @@ router.put('/:id/approve', protectUser, requireAdmin, async (req, res) => {
       message: `Shop ${shop.isApproved ? 'approved' : 'rejected'} successfully`
     });
   } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/admin/stats — Platform-wide KPIs (admin only)
+router.get('/admin/stats', protectUser, requireAdmin, async (req, res) => {
+  try {
+    const [totalShops, approvedShops, pendingShops, suspendedShops, totalLeads, totalReviews, totalCustomers, avgRatingAgg] = await Promise.all([
+      Shop.countDocuments(),
+      Shop.countDocuments({ isApproved: true, isActive: true }),
+      Shop.countDocuments({ isApproved: false }),
+      Shop.countDocuments({ isActive: false }),
+      Lead.countDocuments(),
+      Review.countDocuments(),
+      User.countDocuments({ role: 'customer' }),
+      Shop.aggregate([
+        { $match: { isApproved: true, isActive: true, totalReviews: { $gt: 0 } } },
+        { $group: { _id: null, avg: { $avg: '$rating' } } },
+      ]),
+    ]);
+
+    const leadsByStatus = await Lead.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+
+    const statusMap = {};
+    leadsByStatus.forEach(s => { statusMap[s._id] = s.count; });
+
+    res.json({
+      success: true,
+      stats: {
+        totalShops,
+        approvedShops,
+        pendingShops,
+        suspendedShops,
+        totalLeads,
+        totalReviews,
+        totalCustomers,
+        avgRating: avgRatingAgg[0] ? Math.round(avgRatingAgg[0].avg * 10) / 10 : 0,
+        leadsByStatus: statusMap,
+      },
+    });
+  } catch (error) {
+    console.error('Admin stats error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/admin/all — All shops with filters (admin only)
+router.get('/admin/all', protectUser, requireAdmin, async (req, res) => {
+  try {
+    const { status, service, city, search, page = 1 } = req.query;
+    const limit = 20;
+    const skip = (parseInt(page) - 1) * limit;
+    const query = {};
+
+    if (status === 'approved') { query.isApproved = true; query.isActive = true; }
+    else if (status === 'pending') { query.isApproved = false; }
+    else if (status === 'suspended') { query.isActive = false; }
+
+    if (service && service !== 'all') {
+      query.services = { $in: [service] };
+    }
+    if (city) {
+      query['address.city'] = new RegExp(city, 'i');
+    }
+    if (search) {
+      query.$or = [
+        { businessName: new RegExp(search, 'i') },
+        { ownerName: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+      ];
+    }
+
+    const shops = await Shop.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Shop.countDocuments(query);
+
+    res.json({
+      success: true,
+      shops,
+      pagination: { page: parseInt(page), totalPages: Math.ceil(total / limit), total },
+    });
+  } catch (error) {
+    console.error('Admin all shops error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// DELETE /api/shops/admin/:id — Admin force-delete a shop (cascades reviews + leads)
+router.delete('/admin/:id', protectUser, requireAdmin, async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid shop ID' });
+    }
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    // Cascade delete reviews and leads
+    await Promise.all([
+      Review.deleteMany({ shopId: shop._id }),
+      Lead.deleteMany({ shopId: shop._id }),
+      Shop.findByIdAndDelete(shop._id),
+    ]);
+
+    res.json({ success: true, message: `Shop "${shop.businessName}" and all associated data deleted` });
+  } catch (error) {
+    console.error('Admin delete shop error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// GET /api/shops/admin/leads — All leads across all shops (admin only)
+router.get('/admin/leads', protectUser, requireAdmin, async (req, res) => {
+  try {
+    const { status, service, page = 1 } = req.query;
+    const limit = 30;
+    const skip = (parseInt(page) - 1) * limit;
+    const query = {};
+
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    if (service && service !== 'all') {
+      query.serviceRequested = service;
+    }
+
+    const leads = await Lead.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('shopId', 'businessName email')
+      .lean();
+
+    const total = await Lead.countDocuments(query);
+
+    res.json({
+      success: true,
+      leads,
+      pagination: { page: parseInt(page), totalPages: Math.ceil(total / limit), total },
+    });
+  } catch (error) {
+    console.error('Admin leads error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// PUT /api/shops/:id/suspend — Admin toggle shop active/inactive
+router.put('/:id/suspend', protectUser, requireAdmin, async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid shop ID' });
+    }
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    shop.isActive = !shop.isActive;
+    await shop.save();
+
+    res.json({
+      success: true,
+      shop: { _id: shop._id, businessName: shop.businessName, isActive: shop.isActive },
+      message: `Shop "${shop.businessName}" ${shop.isActive ? 'reactivated' : 'suspended'} successfully`,
+    });
+  } catch (error) {
+    console.error('Suspend shop error:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// DELETE /api/shops/me — Shop owner self-delete (requires password)
+router.delete('/me', protect, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ success: false, error: 'Password is required to delete your account' });
+    }
+
+    const shop = await Shop.findById(req.shopId);
+    if (!shop) return res.status(404).json({ success: false, error: 'Shop not found' });
+
+    const bcrypt = require('bcryptjs');
+    const isMatch = await bcrypt.compare(password, shop.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Incorrect password' });
+    }
+
+    // Cascade delete
+    await Promise.all([
+      Review.deleteMany({ shopId: shop._id }),
+      Lead.deleteMany({ shopId: shop._id }),
+      Shop.findByIdAndDelete(shop._id),
+    ]);
+
+    res.json({ success: true, message: 'Your shop account and all associated data have been permanently deleted' });
+  } catch (error) {
+    console.error('Shop self-delete error:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
