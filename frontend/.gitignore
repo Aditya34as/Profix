@@ -30,6 +30,7 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
 *.swp
 *.swo
 
@@ -40,3 +41,6 @@ Thumbs.db
 # Cache
 .cache/
 .parcel-cache/
+=======
+.env
+>>>>>>> 8b9f88d073de0268a0ae57d2ee439d4f779e360d
