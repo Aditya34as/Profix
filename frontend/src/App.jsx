@@ -80,6 +80,14 @@ const GuestOnly = ({ children }) => {
   return children;
 };
 
+// Redirect based on role — shop owners to dashboard, admins to admin, customers to home
+const RoleRedirect = () => {
+  const { isShopOwner, isAdmin } = useAuth();
+  if (isAdmin) return <Navigate to="/admin" replace />;
+  if (isShopOwner) return <Navigate to="/dashboard" replace />;
+  return <Home />;
+};
+
 /* ─── App layout wrapper — hides Navbar/Footer on auth page ─── */
 const AppRoutes = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -97,10 +105,10 @@ const AppRoutes = () => {
               <GuestOnly><AuthPage /></GuestOnly>
             } />
 
-            {/* ── Root redirect ── */}
+            {/* ── Root redirect based on role ── */}
             <Route path="/" element={
               <RequireAuth>
-                <Home />
+                <RoleRedirect />
               </RequireAuth>
             } />
 
