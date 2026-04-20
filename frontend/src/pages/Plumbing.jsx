@@ -73,8 +73,8 @@ const Plumbing = () => {
             </p>
             
             <div style={styles.heroActions}>
-              <a href="tel:+919876543210" style={styles.callButtonPrimary}>
-                <Phone size={24} /> Call Now: +91 98765 43210
+              <a href="tel:+919336124550" style={styles.callButtonPrimary}>
+                <Phone size={24} /> Call Now: +91 93361 24550
               </a>
             </div>
           </div>
@@ -150,8 +150,8 @@ const Plumbing = () => {
       
       {/* Sticky Mobile Footer — only visible on mobile via CSS */}
       <div className="sticky-mobile-cta">
-         <a href="tel:+919876543210" style={{...styles.callButtonPrimary, width: '100%', justifyContent: 'center', padding: '12px' }}>
-            <Phone size={20} /> Call +91 98765 43210
+         <a href="tel:+919336124550" style={{...styles.callButtonPrimary, width: '100%', justifyContent: 'center', padding: '12px' }}>
+            <Phone size={20} /> Call +91 93361 24550
           </a>
       </div>
     </>

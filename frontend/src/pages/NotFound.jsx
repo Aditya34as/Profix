@@ -16,8 +16,8 @@ const NotFound = () => {
             <Link to="/" className="btn-secondary" style={styles.homeBtn}>
               Back to Home
             </Link>
-            <a href="tel:+919876543210" style={styles.callLink}>
-              Or call us: +91 98765 43210
+            <a href="tel:+919336124550" style={styles.callLink}>
+              Or call us: +91 93361 24550
             </a>
           </div>
         </div>
