@@ -17,7 +17,7 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article, noinde
     "name": "Pro Fix India",
     "alternateName": "Pro Fix Home Services",
     "url": siteUrl,
-    "telephone": "+919876543210",
+    "telephone": "+919336124550",
     "email": "info@profixindia.in",
     "priceRange": "₹₹",
     "image": [
@@ -85,7 +85,7 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article, noinde
       "https://x.com/profixindia",
       "https://www.youtube.com/@profixindia",
       "https://www.linkedin.com/company/profixindia",
-      "https://wa.me/919876543210"
+      "https://wa.me/919336124550"
     ],
     "founder": {
       "@type": "Person",
@@ -102,7 +102,7 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article, noinde
     "logo": `${siteUrl}/favicon.svg`,
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+919876543210",
+      "telephone": "+919336124550",
       "contactType": "customer service",
       "areaServed": "IN",
       "availableLanguage": ["English", "Hindi"]
@@ -113,7 +113,7 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article, noinde
       "https://x.com/profixindia",
       "https://www.youtube.com/@profixindia",
       "https://www.linkedin.com/company/profixindia",
-      "https://wa.me/919876543210"
+      "https://wa.me/919336124550"
     ]
   };
 

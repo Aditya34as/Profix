@@ -36,7 +36,7 @@ const SOCIAL_LINKS = [
   { label: 'X (Twitter)', href: 'https://x.com/profixindia', Icon: TwitterXIcon, color: '#fff' },
   { label: 'YouTube', href: 'https://www.youtube.com/@profixindia', Icon: YouTubeIcon, color: '#FF0000' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/profixindia', Icon: LinkedInIcon, color: '#0A66C2' },
-  { label: 'WhatsApp', href: 'https://wa.me/919876543210', Icon: WhatsAppIcon, color: '#25D366' },
+  { label: 'WhatsApp', href: 'https://wa.me/919336124550', Icon: WhatsAppIcon, color: '#25D366' },
 ];
 
 const Footer = () => {
@@ -64,7 +64,7 @@ const Footer = () => {
             <div style={styles.contactList}>
                <div style={styles.contactItem}>
                  <Phone size={15} color="var(--color-primary-container)" />
-                 <a href="tel:+919876543210" style={styles.contactLink}>+91 98765 43210</a>
+                 <a href="tel:+919336124550" style={styles.contactLink}>+91 93361 24550</a>
                </div>
                <div style={styles.contactItem}>
                  <Mail size={15} color="var(--color-primary-container)" />
