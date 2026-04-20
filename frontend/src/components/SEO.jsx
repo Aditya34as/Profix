@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
+const SEO = ({ title, description, keywords, url, serviceSchema, article, noindex }) => {
   const siteName = 'Pro Fix India — Trusted Home Services';
   const currentTitle = title ? `${title} | Pro Fix India` : siteName;
   const defaultDescription = 'Book verified AC repair, plumbing, geyser repair & deep cleaning professionals near you in Delhi NCR. 90-minute dispatch, upfront pricing, 30-day service warranty. Rated 4.9★ by 10,000+ customers.';
@@ -46,7 +46,11 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
       { "@type": "City", "name": "Noida" },
       { "@type": "City", "name": "Faridabad" },
       { "@type": "City", "name": "Ghaziabad" },
-      { "@type": "City", "name": "Greater Noida" }
+      { "@type": "City", "name": "Greater Noida" },
+      { "@type": "City", "name": "Dwarka" },
+      { "@type": "City", "name": "Rohini" },
+      { "@type": "City", "name": "Indirapuram" },
+      { "@type": "City", "name": "Laxmi Nagar" }
     ],
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
@@ -55,7 +59,11 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AC Repair & Servicing" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Plumbing Services" } },
         { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Geyser & Water Heater Repair" } },
-        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Deep Cleaning" } }
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Deep Cleaning" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Electrical Repair" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Carpentry Services" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Painting Services" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Pest Control" } }
       ]
     },
     "aggregateRating": {
@@ -114,6 +122,7 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
     "@type": "WebSite",
     "name": "Pro Fix India",
     "url": siteUrl,
+    "inLanguage": "en-IN",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -133,18 +142,38 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
     ]
   };
 
+  // WebPage schema for each page
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": article ? "Article" : "WebPage",
+    "name": currentTitle,
+    "description": currentDescription,
+    "url": currentUrl,
+    "inLanguage": "en-IN",
+    "isPartOf": { "@id": `${siteUrl}/#website` },
+    "about": { "@id": `${siteUrl}/#business` },
+    "dateModified": new Date().toISOString().split('T')[0],
+  };
+
   return (
     <Helmet>
       <title>{currentTitle}</title>
       <meta name="description" content={currentDescription} />
       <meta name="keywords" content={currentKeywords} />
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"} />
       <meta name="author" content="Pro Fix India" />
       <meta name="publisher" content="Pro Fix India" />
       <meta name="theme-color" content="#003c89" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-title" content="Pro Fix India" />
+      <meta name="format-detection" content="telephone=yes" />
+      <meta name="google" content="notranslate" />
+      <meta httpEquiv="content-language" content="en-IN" />
       <link rel="canonical" href={currentUrl} />
+      
+      {/* Hreflang for India audience */}
+      <link rel="alternate" hreflang="en-IN" href={currentUrl} />
+      <link rel="alternate" hreflang="x-default" href={currentUrl} />
       
       {/* Geo Meta Tags for Local SEO */}
       <meta name="geo.region" content="IN-DL" />
@@ -162,7 +191,7 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
       <meta property="og:image" content={`${siteUrl}/hero_bg.png`} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content="Pro Fix India - Trusted Home Services" />
+      <meta property="og:image:alt" content="Pro Fix India - Trusted Home Services Near You" />
       
       {/* Twitter Card Tags */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -190,6 +219,11 @@ const SEO = ({ title, description, keywords, url, serviceSchema, article }) => {
       {/* Breadcrumb Schema */}
       <script type="application/ld+json">
         {JSON.stringify(breadcrumbSchema)}
+      </script>
+
+      {/* WebPage Schema */}
+      <script type="application/ld+json">
+        {JSON.stringify(webPageSchema)}
       </script>
 
       {/* Optional Service-specific Schemas */}

@@ -1,4 +1,22 @@
+# Pro Fix India — Robots.txt
+# https://www.profixindia.in
+
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /api/
 
+# Allow all major crawlers explicitly
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Sitemap location
 Sitemap: https://www.profixindia.in/sitemap.xml

@@ -37,7 +37,7 @@ const UserLogin = () => {
 
   return (
     <>
-      <SEO title="Login | Pro Fix" description="Login to your Pro Fix account to find and book local services." />
+      <SEO title="Sign In or Register" description="Sign in to Pro Fix India to book verified home service professionals near you." noindex />
 
       <div style={styles.page}>
         <div className="animate-fade-in-up" style={styles.card}>

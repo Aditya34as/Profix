@@ -113,8 +113,86 @@ const ShopProfile = () => {
   return (
     <>
       <SEO 
-        title={`${shop.businessName} | Pro Fix`}
-        description={shop.description || `${shop.businessName} — local service provider on Pro Fix.`}
+        title={`${shop.businessName} — ${shop.services?.map(s => SERVICE_LABELS[s] || s).join(', ')} | Pro Fix`}
+        description={shop.description || `${shop.businessName} — verified ${shop.services?.map(s => SERVICE_LABELS[s] || s).join(', ').toLowerCase()} provider in ${shop.address?.city || 'your area'}. ${shop.rating ? `Rated ${shop.rating}★` : 'Book now'} on Pro Fix India. Transparent pricing, 30-day warranty.`}
+        keywords={`${shop.businessName}, ${shop.services?.map(s => (SERVICE_LABELS[s] || s).toLowerCase()).join(', ')}, ${shop.services?.map(s => `${(SERVICE_LABELS[s] || s).toLowerCase()} ${shop.address?.city || ''}`).join(', ')}, ${shop.address?.city || ''} home services, best ${shop.services?.map(s => (SERVICE_LABELS[s] || s).toLowerCase()).join(' ')} near me`}
+        url={`https://www.profixindia.in/shop/${id}`}
+        serviceSchema={(() => {
+          const schemas = [];
+          // LocalBusiness schema for the shop
+          const shopSchema = {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": shop.businessName,
+            "url": `https://www.profixindia.in/shop/${id}`,
+            "telephone": shop.phone,
+            "description": shop.description || `${shop.businessName} — verified service provider on Pro Fix India`,
+            "priceRange": "₹₹",
+          };
+          if (shop.profileImage) shopSchema.image = `${API_URL}${shop.profileImage}`;
+          if (shop.address) {
+            shopSchema.address = {
+              "@type": "PostalAddress",
+              "streetAddress": shop.address.street || '',
+              "addressLocality": shop.address.city || '',
+              "addressRegion": shop.address.state || '',
+              "postalCode": shop.address.pincode || '',
+              "addressCountry": "IN"
+            };
+          }
+          if (shop.location?.coordinates) {
+            shopSchema.geo = {
+              "@type": "GeoCoordinates",
+              "latitude": shop.location.coordinates[1],
+              "longitude": shop.location.coordinates[0]
+            };
+          }
+          if (shop.rating && shop.totalReviews > 0) {
+            shopSchema.aggregateRating = {
+              "@type": "AggregateRating",
+              "ratingValue": String(shop.rating),
+              "reviewCount": String(shop.totalReviews),
+              "bestRating": "5",
+              "worstRating": "1"
+            };
+          }
+          if (shop.services?.length) {
+            shopSchema.hasOfferCatalog = {
+              "@type": "OfferCatalog",
+              "name": "Services",
+              "itemListElement": shop.services.map(s => ({
+                "@type": "Offer",
+                "itemOffered": { "@type": "Service", "name": SERVICE_LABELS[s] || s }
+              }))
+            };
+          }
+          if (shop.openingHours) {
+            shopSchema.openingHoursSpecification = {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+              "opens": "08:00",
+              "closes": "21:00"
+            };
+          }
+          schemas.push(shopSchema);
+          // Review schemas
+          if (reviews.length > 0) {
+            const reviewSchema = {
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              "name": shop.businessName,
+              "review": reviews.slice(0, 5).map(r => ({
+                "@type": "Review",
+                "author": { "@type": "Person", "name": r.reviewerName },
+                "reviewRating": { "@type": "Rating", "ratingValue": String(r.rating), "bestRating": "5" },
+                ...(r.comment ? { "reviewBody": r.comment } : {}),
+                ...(r.createdAt ? { "datePublished": new Date(r.createdAt).toISOString().split('T')[0] } : {})
+              }))
+            };
+            schemas.push(reviewSchema);
+          }
+          return schemas;
+        })()}
       />
 
       <div style={styles.page}>
@@ -219,7 +297,7 @@ const ShopProfile = () => {
                     <div style={styles.galleryGrid}>
                       {shop.galleryImages.map((img, i) => (
                         <div key={i} style={styles.galleryThumb} onClick={() => setActiveImage(img)}>
-                          <img src={`${API_URL}${img}`} alt="" style={styles.galleryImg} />
+                          <img src={`${API_URL}${img}`} alt={`${shop.businessName} — work photo ${i + 1}`} style={styles.galleryImg} loading="lazy" />
                         </div>
                       ))}
                     </div>

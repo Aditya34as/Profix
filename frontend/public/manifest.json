@@ -1,0 +1,20 @@
+{
+  "name": "Pro Fix India — Trusted Home Services",
+  "short_name": "Pro Fix",
+  "description": "Book verified AC repair, plumbing, geyser repair & deep cleaning professionals near you in Delhi NCR. 90-minute dispatch, upfront pricing, 30-day warranty.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#003c89",
+  "orientation": "portrait-primary",
+  "categories": ["home services", "utilities", "local"],
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

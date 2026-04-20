@@ -237,7 +237,7 @@ const ShopDashboard = () => {
 
   return (
     <>
-      <SEO title="Dashboard | Pro Fix" />
+      <SEO title="Dashboard | Pro Fix" noindex />
 
       <div style={styles.page}>
         <div className="container">

@@ -1,23 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Homepage -->
   <url>
     <loc>https://www.profixindia.in/</loc>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Find Services (Main Search Page) -->
+  <url>
+    <loc>https://www.profixindia.in/find-services</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Service: AC Repair -->
   <url>
     <loc>https://www.profixindia.in/services/ac-repair</loc>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Service: Plumbing -->
   <url>
     <loc>https://www.profixindia.in/services/plumbing</loc>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Service: Geyser / Water Heater -->
   <url>
     <loc>https://www.profixindia.in/services/geysers</loc>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Find Services: AC Repair filter -->
+  <url>
+    <loc>https://www.profixindia.in/find-services?service=ac-repair</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Find Services: Plumbing filter -->
+  <url>
+    <loc>https://www.profixindia.in/find-services?service=plumbing</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Find Services: Water Heater filter -->
+  <url>
+    <loc>https://www.profixindia.in/find-services?service=water-heater</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Find Services: Cleaning filter -->
+  <url>
+    <loc>https://www.profixindia.in/find-services?service=cleaning</loc>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>

@@ -88,7 +88,7 @@ const AdminPanel = () => {
 
   return (
     <>
-      <SEO title="Admin Console | Pro Fix" />
+      <SEO title="Admin Console | Pro Fix" noindex />
       <style>{adminCSS}</style>
 
       <div style={s.layout}>

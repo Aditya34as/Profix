@@ -46,8 +46,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
     <!-- Canonical -->
     <link rel="canonical" href="https://www.profixindia.in" />
+    
+    <!-- Hreflang: target English & Hindi speakers in India -->
+    <link rel="alternate" hreflang="en-IN" href="https://www.profixindia.in" />
+    <link rel="alternate" hreflang="x-default" href="https://www.profixindia.in" />
+    
+    <!-- SPA Crawling Support -->
+    <meta name="fragment" content="!" />
     
     <!-- Design System Typography: Public Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,7 +71,16 @@
     <title>Pro Fix India — Trusted AC Repair, Plumbing & Home Services Near You</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run Pro Fix India.</noscript>
+    <noscript>
+      <h1>Pro Fix India — Trusted Home Services</h1>
+      <p>Book verified AC repair, plumbing, geyser repair and deep cleaning professionals near you in Delhi NCR. Visit <a href="https://www.profixindia.in">profixindia.in</a> with JavaScript enabled for the full experience.</p>
+      <ul>
+        <li><a href="/services/ac-repair">AC Repair & Servicing</a></li>
+        <li><a href="/services/plumbing">Plumbing Services</a></li>
+        <li><a href="/services/geysers">Geyser & Water Heater Repair</a></li>
+        <li><a href="/find-services">Find Services Near You</a></li>
+      </ul>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
