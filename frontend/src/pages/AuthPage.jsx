@@ -164,6 +164,7 @@ const AuthPage = () => {
     }
   }, [isAuthenticated, isShopOwner, isCustomer, isAdmin, navigate]);
 
+
   /* ─── Animate form transitions ─── */
   const animateFormChange = useCallback((callback) => {
     const card = document.querySelector('.auth-form-inner');
@@ -228,27 +229,9 @@ const AuthPage = () => {
 
   const togglePwd = () => setShowPwd(p => !p);
 
-  /* ─── Animated role switch with RED for business ─── */
+  /* ─── Role switch — pill position driven by React state + CSS transitions ─── */
   const handleRoleSwitch = useCallback((newRole) => {
     if (signInForm.role === newRole) return;
-    const pill = document.querySelector('.role-slider-pill');
-    const container = document.querySelector('.role-toggle-container');
-    if (pill && container) {
-      const isCust = newRole === 'customer';
-      gsap.to(pill, {
-        x: isCust ? 0 : container.offsetWidth / 2 - 4,
-        duration: 0.4,
-        ease: 'power3.out',
-      });
-      // Animate pill color change
-      gsap.to(pill, {
-        background: isCust
-          ? 'linear-gradient(135deg, #003c89, #1e5bb8)'
-          : 'linear-gradient(135deg, #b12d00, #e05500)',
-        duration: 0.35,
-        ease: 'power2.out',
-      });
-    }
     // Animate the subtitle
     const subtitle = document.querySelector('.signin-subtitle');
     if (subtitle) {
@@ -447,10 +430,9 @@ const AuthPage = () => {
           position: absolute; top: 4px; left: 4px;
           width: calc(50% - 4px); height: calc(100% - 8px);
           border-radius: 11px;
-          background: linear-gradient(135deg, #003c89, #1e5bb8);
           z-index: 1;
           box-shadow: 0 2px 10px rgba(0,60,137,0.35);
-          transition: background 0.35s ease;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s ease, box-shadow 0.35s ease;
         }
         .role-toggle-btn {
           flex: 1; position: relative; z-index: 2;
@@ -687,11 +669,19 @@ const AuthPage = () => {
                 {/* Mode tabs */}
                 <div className="auth-mode-tabs">
                   <button type="button" className={`auth-tab ${mode === 'signin' ? 'active' : ''}`}
-                    onClick={() => animateFormChange(() => { setMode('signin'); setRole(null); })}>
+                    onClick={() => animateFormChange(() => {
+                      // When switching to sign-in, carry over the current signup role to sign-in toggle
+                      if (role) setSignInForm(p => ({ ...p, role: role === 'business' ? 'business' : 'customer' }));
+                      setMode('signin'); setRole(null);
+                    })}>
                     Sign in
                   </button>
                   <button type="button" className={`auth-tab ${mode === 'signup' ? 'active' : ''}`}
-                    onClick={() => animateFormChange(() => { setMode('signup'); setRole(null); })}>
+                    onClick={() => animateFormChange(() => {
+                      // When switching to sign-up, pre-select role based on current sign-in toggle
+                      const preRole = signInForm.role === 'business' ? 'business' : null;
+                      setMode('signup'); setRole(preRole);
+                    })}>
                     Create account
                   </button>
                 </div>
@@ -706,9 +696,17 @@ const AuthPage = () => {
                       </p>
                     </div>
 
-                    {/* Role toggle — blue ↔ red */}
+                    {/* Role toggle — blue ↔ red — pill driven by state */}
                     <div className="role-slider-wrap role-toggle-container">
-                      <div className="role-slider-pill" />
+                      <div className="role-slider-pill" style={{
+                        transform: isBizRole ? 'translateX(calc(100% + 8px))' : 'translateX(0)',
+                        background: isBizRole
+                          ? 'linear-gradient(135deg, #b12d00, #e05500)'
+                          : 'linear-gradient(135deg, #003c89, #1e5bb8)',
+                        boxShadow: isBizRole
+                          ? '0 2px 10px rgba(177,45,0,0.35)'
+                          : '0 2px 10px rgba(0,60,137,0.35)',
+                      }} />
                       <button type="button" className={`role-toggle-btn ${!isBizRole ? 'active' : ''}`}
                         onClick={() => handleRoleSwitch('customer')}>
                         <Search size={15} className="role-icon" /> Customer
@@ -744,7 +742,11 @@ const AuthPage = () => {
                         ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><span className="auth-spinner" /> Signing in...</span>
                         : 'Sign In'}
                     </button>
-                    <p className="auth-switch">Don't have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => setMode('signup'))}>Create one</button></p>
+                    <p className="auth-switch">Don't have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => {
+                      // Carry current sign-in role to sign-up: business goes straight to biz form, customer goes to role picker
+                      const preRole = signInForm.role === 'business' ? 'business' : null;
+                      setMode('signup'); setRole(preRole);
+                    })}>Create one</button></p>
                   </form>
                 )}
 
@@ -779,7 +781,7 @@ const AuthPage = () => {
                         <span className="auth-role-cta" style={{ color: '#b12d00' }}>List Business <ArrowRight size={15} /></span>
                       </button>
                     </div>
-                    <p className="auth-switch">Already have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => setMode('signin'))}>Sign in</button></p>
+                    <p className="auth-switch">Already have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => { setMode('signin'); setRole(null); })}>Sign in</button></p>
                   </div>
                 )}
 
@@ -798,7 +800,10 @@ const AuthPage = () => {
                     <button type="submit" className="auth-submit cust" disabled={submitting}>
                       {submitting ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><span className="auth-spinner" /> Creating...</span> : 'Create Account'}
                     </button>
-                    <p className="auth-switch">Already have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => setMode('signin'))}>Sign in</button></p>
+                    <p className="auth-switch">Already have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => {
+                      // Carry 'customer' role back to sign-in toggle
+                      setSignInForm(p => ({ ...p, role: 'customer' })); setMode('signin'); setRole(null);
+                    })}>Sign in</button></p>
                   </form>
                 )}
 
@@ -892,7 +897,10 @@ const AuthPage = () => {
                       {submitting ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><span className="auth-spinner" /> Registering...</span> : 'Register Business'}
                     </button>
                     <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0' }}>Your listing will be reviewed by our admin team.</p>
-                    <p className="auth-switch">Already have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => setMode('signin'))}>Sign in</button></p>
+                    <p className="auth-switch">Already have an account? <button type="button" className="auth-link" onClick={() => animateFormChange(() => {
+                      // Carry 'business' role back to sign-in toggle
+                      setSignInForm(p => ({ ...p, role: 'business' })); setMode('signin'); setRole(null);
+                    })}>Sign in</button></p>
                   </form>
                 )}
               </div>
