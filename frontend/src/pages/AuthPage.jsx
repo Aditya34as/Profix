@@ -824,11 +824,13 @@ const AuthPage = () => {
 
                     <div className="auth-section-lbl"><Wrench size={13} /> Services Offered *</div>
                     <div className="auth-chips">
-                      {SERVICE_OPTIONS.map(opt => { const Icon = opt.icon; return (
-                        <button key={opt.value} type="button" onClick={() => toggleBizService(opt.value)} className={`auth-chip ${bizForm.services.includes(opt.value) ? 'on' : ''}`}>
-                          <Icon size={14} /> {opt.label}
-                        </button>
-                      ); })}
+                      {SERVICE_OPTIONS.map(opt => {
+                        const Icon = opt.icon; return (
+                          <button key={opt.value} type="button" onClick={() => toggleBizService(opt.value)} className={`auth-chip ${bizForm.services.includes(opt.value) ? 'on' : ''}`}>
+                            <Icon size={14} /> {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
                     <div className="auth-field"><label className="auth-label"><Wrench size={13} /> Description</label><textarea className="form-input-auth" rows="2" style={{ resize: 'vertical' }} placeholder="Tell customers about your business..." value={bizForm.description} onChange={e => setBizForm(p => ({ ...p, description: e.target.value }))} /></div>
 
