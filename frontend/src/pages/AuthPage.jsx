@@ -258,7 +258,7 @@ const AuthPage = () => {
         title="Sign In or Register — Pro Fix India | Trusted Home Services"
         description="Join Pro Fix India — sign in or create your free account to book verified AC repair, plumbing, geyser, and cleaning services near you. Businesses can register to reach local customers instantly."
         keywords="Pro Fix login, Pro Fix sign up, home services India, AC repair near me login, plumber booking India, register business Pro Fix"
-        url="https://www.profixindia.in/auth"
+        url="https://profix-front.onrender.com/auth"
       />
 
       <style>{`

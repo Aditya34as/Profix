@@ -85,7 +85,7 @@ const Home = () => {
         title="Best Home Services Near You — AC Repair, Plumber, Geyser & Cleaning" 
         description="Pro Fix India connects you with 500+ verified AC repair, plumbing, geyser repair & deep cleaning experts in Delhi NCR. 90-minute response, transparent pricing, 30-day warranty. Rated 4.9★ by 10,000+ customers. Book now!"
         keywords="best home services near me, AC repair near me Delhi, plumber near me Gurgaon, geyser repair Noida, deep cleaning services Delhi NCR, emergency AC repair, same day plumber, Pro Fix home services, trusted technicians India, affordable home repair, local service marketplace India, book AC service online"
-        url="https://www.profixindia.in"
+        url="https://profix-front.onrender.com"
         serviceSchema={[faqSchema, reviewSchema]}
       />
       
