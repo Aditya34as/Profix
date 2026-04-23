@@ -792,7 +792,7 @@ const AuthPage = () => {
                     <div><h2 className="auth-form-title">Customer Sign Up</h2><p className="auth-form-sub">Create your free account</p></div>
                     <div className="auth-field"><label className="auth-label"><User size={13} /> Full Name</label><div><input className="form-input-auth" type="text" placeholder="Rahul Kumar" value={custForm.name} onChange={e => setCustForm(p => ({ ...p, name: e.target.value }))} required /></div></div>
                     <div className="auth-field"><label className="auth-label"><Mail size={13} /> Email</label><div><input className="form-input-auth" type="email" placeholder="your@email.com" value={custForm.email} onChange={e => setCustForm(p => ({ ...p, email: e.target.value }))} required /></div></div>
-                    <div className="auth-field"><label className="auth-label"><Phone size={13} /> Phone (optional)</label><div><input className="form-input-auth" type="tel" placeholder="+91 98765 43210" value={custForm.phone} onChange={e => setCustForm(p => ({ ...p, phone: e.target.value }))} /></div></div>
+                    <div className="auth-field"><label className="auth-label"><Phone size={13} /> Phone (optional)</label><div><input className="form-input-auth" type="tel" placeholder="+91 9876543210" value={custForm.phone} onChange={e => setCustForm(p => ({ ...p, phone: e.target.value }))} /></div></div>
                     <div className="auth-row">
                       <div className="auth-field"><label className="auth-label"><Lock size={13} /> Password</label><div style={{ position: 'relative' }}><input className="form-input-auth" type={showPwd ? 'text' : 'password'} placeholder="Min 6 chars" value={custForm.password} onChange={e => setCustForm(p => ({ ...p, password: e.target.value }))} required /><button type="button" className="auth-eye" onClick={togglePwd} tabIndex={-1}>{showPwd ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></div>
                       <div className="auth-field"><label className="auth-label"><Lock size={13} /> Confirm</label><div><input className="form-input-auth" type={showPwd ? 'text' : 'password'} placeholder="Repeat" value={custForm.confirm} onChange={e => setCustForm(p => ({ ...p, confirm: e.target.value }))} required /></div></div>
@@ -824,11 +824,13 @@ const AuthPage = () => {
 
                     <div className="auth-section-lbl"><Wrench size={13} /> Services Offered *</div>
                     <div className="auth-chips">
-                      {SERVICE_OPTIONS.map(opt => { const Icon = opt.icon; return (
-                        <button key={opt.value} type="button" onClick={() => toggleBizService(opt.value)} className={`auth-chip ${bizForm.services.includes(opt.value) ? 'on' : ''}`}>
-                          <Icon size={14} /> {opt.label}
-                        </button>
-                      ); })}
+                      {SERVICE_OPTIONS.map(opt => {
+                        const Icon = opt.icon; return (
+                          <button key={opt.value} type="button" onClick={() => toggleBizService(opt.value)} className={`auth-chip ${bizForm.services.includes(opt.value) ? 'on' : ''}`}>
+                            <Icon size={14} /> {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
                     <div className="auth-field"><label className="auth-label"><Wrench size={13} /> Description</label><textarea className="form-input-auth" rows="2" style={{ resize: 'vertical' }} placeholder="Tell customers about your business..." value={bizForm.description} onChange={e => setBizForm(p => ({ ...p, description: e.target.value }))} /></div>
 
