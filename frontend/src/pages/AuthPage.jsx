@@ -258,7 +258,7 @@ const AuthPage = () => {
         title="Sign In or Register — Pro Fix India | Trusted Home Services"
         description="Join Pro Fix India — sign in or create your free account to book verified AC repair, plumbing, geyser, and cleaning services near you. Businesses can register to reach local customers instantly."
         keywords="Pro Fix login, Pro Fix sign up, home services India, AC repair near me login, plumber booking India, register business Pro Fix"
-        url="https://www.profixindia.in/auth"
+        url="https://profix-front.onrender.com/auth"
       />
 
       <style>{`
@@ -460,13 +460,14 @@ const AuthPage = () => {
           color: #0f172a; outline: none;
           transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
           box-sizing: border-box;
+          text-overflow: ellipsis;
         }
         .form-input-auth:focus {
           border-color: var(--color-primary, #003c89) !important;
           box-shadow: 0 0 0 4px rgba(0,60,137,0.08) !important;
           background: #fff !important;
         }
-        .form-input-auth::placeholder { color: #cbd5e1; }
+        .form-input-auth::placeholder { color: #cbd5e1; font-size: 0.875rem; }
 
         /* Submit buttons */
         .auth-submit {
@@ -688,7 +689,7 @@ const AuthPage = () => {
 
                 {/* ─── SIGN IN ─── */}
                 {mode === 'signin' && (
-                  <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <form onSubmit={handleSignIn} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     <div>
                       <h2 className="auth-form-title">Welcome back</h2>
                       <p className="auth-form-sub signin-subtitle">
@@ -721,14 +722,14 @@ const AuthPage = () => {
                       <div className="auth-field">
                         <label className="auth-label"><Mail size={13} /> Email</label>
                         <div style={{ position: 'relative' }}>
-                          <input className="form-input-auth" type="email" placeholder="your@email.com"
+                          <input className="form-input-auth" type="email" placeholder="your@email.com" autoComplete="off"
                             value={signInForm.email} onChange={e => setSignInForm(p => ({ ...p, email: e.target.value }))} required />
                         </div>
                       </div>
                       <div className="auth-field">
                         <label className="auth-label"><Lock size={13} /> Password</label>
                         <div style={{ position: 'relative' }}>
-                          <input className="form-input-auth" type={showPwd ? 'text' : 'password'} placeholder="Enter your password"
+                          <input className="form-input-auth" type={showPwd ? 'text' : 'password'} placeholder="Enter your password" autoComplete="new-password"
                             value={signInForm.password} onChange={e => setSignInForm(p => ({ ...p, password: e.target.value }))} required />
                           <button type="button" className="auth-eye" onClick={togglePwd} tabIndex={-1}>
                             {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -787,7 +788,7 @@ const AuthPage = () => {
 
                 {/* ─── SIGN UP: Customer ─── */}
                 {mode === 'signup' && role === 'customer' && (
-                  <form onSubmit={handleCustomerSignup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <form onSubmit={handleCustomerSignup} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <button type="button" className="auth-back" onClick={() => animateFormChange(() => setRole(null))}>← Choose role</button>
                     <div><h2 className="auth-form-title">Customer Sign Up</h2><p className="auth-form-sub">Create your free account</p></div>
                     <div className="auth-field"><label className="auth-label"><User size={13} /> Full Name</label><div><input className="form-input-auth" type="text" placeholder="Rahul Kumar" value={custForm.name} onChange={e => setCustForm(p => ({ ...p, name: e.target.value }))} required /></div></div>
@@ -809,7 +810,7 @@ const AuthPage = () => {
 
                 {/* ─── SIGN UP: Business ─── */}
                 {mode === 'signup' && role === 'business' && (
-                  <form onSubmit={handleBusinessSignup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <form onSubmit={handleBusinessSignup} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <button type="button" className="auth-back" onClick={() => animateFormChange(() => setRole(null))}>← Choose role</button>
                     <div><h2 className="auth-form-title">Business Registration</h2><p className="auth-form-sub">List your service business on Pro Fix</p></div>
 
@@ -818,7 +819,7 @@ const AuthPage = () => {
                     <div className="auth-field"><label className="auth-label"><User size={13} /> Owner Name *</label><div><input className="form-input-auth" type="text" placeholder="Rajesh Kumar" value={bizForm.ownerName} onChange={e => setBizForm(p => ({ ...p, ownerName: e.target.value }))} required /></div></div>
                     <div className="auth-row">
                       <div className="auth-field"><label className="auth-label"><Mail size={13} /> Email *</label><div><input className="form-input-auth" type="email" placeholder="biz@email.com" value={bizForm.email} onChange={e => setBizForm(p => ({ ...p, email: e.target.value }))} required /></div></div>
-                      <div className="auth-field"><label className="auth-label"><Phone size={13} /> Phone *</label><div><input className="form-input-auth" type="tel" placeholder="+91 98765" value={bizForm.phone} onChange={e => setBizForm(p => ({ ...p, phone: e.target.value }))} required /></div></div>
+                      <div className="auth-field"><label className="auth-label"><Phone size={13} /> Phone *</label><div><input className="form-input-auth" type="tel" placeholder="9876543210" autoComplete="off" value={bizForm.phone} onChange={e => setBizForm(p => ({ ...p, phone: e.target.value }))} required /></div></div>
                     </div>
                     <div className="auth-field"><label className="auth-label"><Phone size={13} /> WhatsApp (optional)</label><div><input className="form-input-auth" type="tel" placeholder="Same as phone if empty" value={bizForm.whatsappNumber} onChange={e => setBizForm(p => ({ ...p, whatsappNumber: e.target.value }))} /></div></div>
 

@@ -55,7 +55,7 @@ const Geyser = () => {
         title="Geyser & Water Heater Repair Delhi NCR" 
         description="Instant geyser repair in Delhi NCR. Thermostat changes, element replacements, and leakage fixes for all geyser brands. Book now."
         keywords="Geyser repair Delhi, Water heater fixing Gurgaon, Noida geyser service, Instant hot water repair"
-        url="https://www.profixindia.in/services/geysers"
+        url="https://profix-front.onrender.com/services/geysers"
         serviceSchema={[geyserServiceSchema, geyserFaqSchema]}
       />
       

@@ -55,7 +55,7 @@ const Plumbing = () => {
         title="Expert Plumbing Services in Delhi NCR | Same-Day Repair" 
         description="Priority dispatched emergency plumbing in Delhi NCR. Expert plumbers for leaks, motor repair, and blockages. Book now."
         keywords="Plumber Delhi, Water leakage Gurgaon, Noida plumbing service, 24 hour plumber near me"
-        url="https://www.profixindia.in/services/plumbing"
+        url="https://profix-front.onrender.com/services/plumbing"
         serviceSchema={[plumbingServiceSchema, plumbingFaqSchema]}
       />
       

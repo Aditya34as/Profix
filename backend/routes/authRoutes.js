@@ -24,21 +24,20 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please select at least one service' });
     }
 
-    // Check if email already registered
-    const existing = await Shop.findOne({ email });
+    // Check both collections in parallel for speed
+    const [existing, existingUser] = await Promise.all([
+      Shop.findOne({ email }).lean(),
+      User.findOne({ email }).lean(),
+    ]);
     if (existing) {
       return res.status(400).json({ success: false, error: 'A shop with this email already exists' });
     }
-
-    // Cross-collection check — prevent same email for business + customer
-    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'This email is already registered as a customer account. Please use a different email.' });
     }
 
     // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 8);
 
     const lng = longitude != null && longitude !== '' ? parseFloat(longitude) : NaN;
     const lat = latitude != null && latitude !== '' ? parseFloat(latitude) : NaN;

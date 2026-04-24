@@ -55,7 +55,7 @@ const ACRepair = () => {
         title="Same-Day AC Repair & Servicing in Delhi NCR" 
         description="Priority dispatched emergency AC repair in Delhi NCR. Expert technicians for freezing ACs, gas filling, and compressor repairs. Book now."
         keywords="AC Repair Delhi, AC Gas filling Gurgaon, Noida HVAC service, 24 hour AC repair near me"
-        url="https://www.profixindia.in/services/ac-repair"
+        url="https://profix-front.onrender.com/services/ac-repair"
         serviceSchema={[acServiceSchema, acFaqSchema]}
       />
       

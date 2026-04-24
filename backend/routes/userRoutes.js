@@ -20,19 +20,19 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
     }
 
-    const existing = await User.findOne({ email });
+    // Check both collections in parallel for speed
+    const [existing, existingShop] = await Promise.all([
+      User.findOne({ email }).lean(),
+      Shop.findOne({ email }).lean(),
+    ]);
     if (existing) {
       return res.status(400).json({ success: false, error: 'An account with this email already exists' });
     }
-
-    // Cross-collection check — prevent same email for customer + business
-    const existingShop = await Shop.findOne({ email });
     if (existingShop) {
       return res.status(400).json({ success: false, error: 'This email is already registered as a business account. Please use a different email.' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 8);
 
     const user = new User({
       name: name.trim(),
