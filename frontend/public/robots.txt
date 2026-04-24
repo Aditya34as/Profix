@@ -19,4 +19,4 @@ User-agent: Slurp
 Allow: /
 
 # Sitemap location
-Sitemap: https://www.profixindia.in/sitemap.xml
+Sitemap: https://profix-front.onrender.com/sitemap.xml
