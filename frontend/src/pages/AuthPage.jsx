@@ -19,6 +19,10 @@ const SERVICE_OPTIONS = [
   { value: 'cleaning', label: 'Cleaning', icon: Sparkles },
 ];
 
+/* ─── email validation ─── */
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const isValidEmail = (email) => EMAIL_REGEX.test(email.trim());
+
 /* ═══════════════════════════ MAIN COMPONENT ═══════════════════════════ */
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -183,6 +187,7 @@ const AuthPage = () => {
   const handleSignIn = async (e) => {
     e.preventDefault();
     if (!signInForm.email || !signInForm.password) { toast.error('Please enter email and password'); return; }
+    if (!isValidEmail(signInForm.email)) { toast.error('Please enter a valid email address'); return; }
     setSubmitting(true);
     try {
       const result = signInForm.role === 'business'
@@ -197,6 +202,7 @@ const AuthPage = () => {
   const handleCustomerSignup = async (e) => {
     e.preventDefault();
     if (!custForm.name || !custForm.email || !custForm.password) { toast.error('Name, email, and password are required'); return; }
+    if (!isValidEmail(custForm.email)) { toast.error('Please enter a valid email address (e.g. name@example.com)'); return; }
     if (custForm.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
     if (custForm.password !== custForm.confirm) { toast.error('Passwords do not match'); return; }
     setSubmitting(true);
@@ -215,6 +221,7 @@ const AuthPage = () => {
   const handleBusinessSignup = async (e) => {
     e.preventDefault();
     if (!bizForm.businessName || !bizForm.ownerName || !bizForm.email || !bizForm.password || !bizForm.phone) { toast.error('Please fill all required fields'); return; }
+    if (!isValidEmail(bizForm.email)) { toast.error('Please enter a valid email address (e.g. name@example.com)'); return; }
     if (bizForm.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
     if (bizForm.password !== bizForm.confirm) { toast.error('Passwords do not match'); return; }
     if (bizForm.services.length === 0) { toast.error('Select at least one service'); return; }

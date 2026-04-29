@@ -116,7 +116,7 @@ const ShopProfile = () => {
         title={`${shop.businessName} — ${shop.services?.map(s => SERVICE_LABELS[s] || s).join(', ')} | Pro Fix`}
         description={shop.description || `${shop.businessName} — verified ${shop.services?.map(s => SERVICE_LABELS[s] || s).join(', ').toLowerCase()} provider in ${shop.address?.city || 'your area'}. ${shop.rating ? `Rated ${shop.rating}★` : 'Book now'} on Pro Fix India. Transparent pricing, 30-day warranty.`}
         keywords={`${shop.businessName}, ${shop.services?.map(s => (SERVICE_LABELS[s] || s).toLowerCase()).join(', ')}, ${shop.services?.map(s => `${(SERVICE_LABELS[s] || s).toLowerCase()} ${shop.address?.city || ''}`).join(', ')}, ${shop.address?.city || ''} home services, best ${shop.services?.map(s => (SERVICE_LABELS[s] || s).toLowerCase()).join(' ')} near me`}
-        url={`https://www.profixindia.in/shop/${id}`}
+        url={`https://profix-front.onrender.com/shop/${id}`}
         serviceSchema={(() => {
           const schemas = [];
           // LocalBusiness schema for the shop
@@ -124,7 +124,7 @@ const ShopProfile = () => {
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
             "name": shop.businessName,
-            "url": `https://www.profixindia.in/shop/${id}`,
+            "url": `https://profix-front.onrender.com/shop/${id}`,
             "telephone": shop.phone,
             "description": shop.description || `${shop.businessName} — verified service provider on Pro Fix India`,
             "priceRange": "₹₹",
