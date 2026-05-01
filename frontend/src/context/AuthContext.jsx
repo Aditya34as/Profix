@@ -165,6 +165,9 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(localStorage.getItem('profix_role'));
   const [loading, setLoading] = useState(true);
 
+  /* ─── Skip fetchMe after fresh login/register (profile already in response) ─── */
+  const skipFetchRef = useRef(false);
+
   /* ─── Idle timeout state ─── */
   const [showIdleWarning, setShowIdleWarning] = useState(false);
   const [idleSecondsLeft, setIdleSecondsLeft] = useState(60);
@@ -172,8 +175,13 @@ export const AuthProvider = ({ children }) => {
   const warningTimerRef = useRef(null);
   const countdownRef = useRef(null);
 
-  // On mount, verify token and load profile
+  // On mount, verify token and load profile (skip if login/register just set it)
   useEffect(() => {
+    if (skipFetchRef.current) {
+      skipFetchRef.current = false;
+      setLoading(false);
+      return;
+    }
     if (token && role) {
       fetchMe();
     } else {
@@ -298,12 +306,14 @@ export const AuthProvider = ({ children }) => {
     });
     const data = await res.json();
     if (data.success) {
+      skipFetchRef.current = true; // profile already in response — skip fetchMe
       localStorage.setItem('profix_token', data.token);
       localStorage.setItem('profix_role', 'shop');
       setToken(data.token);
       setRole('shop');
       setShop(data.shop);
       setUser(null);
+      setLoading(false);
     }
     return data;
   };
@@ -351,12 +361,14 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
     if (data.success) {
       const userRole = data.role || 'customer';
+      skipFetchRef.current = true; // profile already in response — skip fetchMe
       localStorage.setItem('profix_token', data.token);
       localStorage.setItem('profix_role', userRole);
       setToken(data.token);
       setRole(userRole);
       setUser(data.user);
       setShop(null);
+      setLoading(false);
     }
     return data;
   };

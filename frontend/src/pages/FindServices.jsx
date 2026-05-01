@@ -66,7 +66,7 @@ const FindServices = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [service, setService] = useState(searchParams.get('service') || 'all');
-  const [radius, setRadius] = useState(15);
+  const [radius, setRadius] = useState(10);
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState('idle');
   const [compareIds, setCompareIds] = useState([]);
