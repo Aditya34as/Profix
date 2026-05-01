@@ -139,6 +139,9 @@ const AppRoutes = () => {
               <RequireAuth><AdminPanel /></RequireAuth>
             } />
 
+            {/* ── Render SPA fallback: /index.html → / ── */}
+            <Route path="/index.html" element={<Navigate to="/" replace />} />
+
             {/* ── Catch-all ── */}
             <Route path="*" element={
               loading ? <LoadingFallback /> :

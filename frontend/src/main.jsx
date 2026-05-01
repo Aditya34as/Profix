@@ -4,6 +4,38 @@ import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import './index.css'
 
+/* ── SPA Redirect Fix ──
+   Render's static site does a 301 redirect (URL changes to /index.html)
+   instead of a 200 rewrite (URL stays the same). This breaks React Router.
+   Fix: Before React mounts, if we landed on /index.html, restore the
+   original path the user was on. */
+;(() => {
+  const path = window.location.pathname;
+  // If server redirected to /index.html, restore the saved path
+  if (path === '/index.html' || path === '/index') {
+    const savedPath = sessionStorage.getItem('profix_path') || '/';
+    if (savedPath !== '/index.html' && savedPath !== '/index') {
+      window.history.replaceState(null, '', savedPath);
+    } else {
+      window.history.replaceState(null, '', '/');
+    }
+  }
+  // Continuously save current path so it survives server redirects
+  const savePath = () => {
+    const p = window.location.pathname + window.location.search;
+    if (p !== '/index.html' && p !== '/index') {
+      sessionStorage.setItem('profix_path', p);
+    }
+  };
+  savePath();
+  // Patch pushState/replaceState to track navigation
+  const origPush = history.pushState.bind(history);
+  const origReplace = history.replaceState.bind(history);
+  history.pushState = (...args) => { origPush(...args); savePath(); };
+  history.replaceState = (...args) => { origReplace(...args); savePath(); };
+  window.addEventListener('popstate', savePath);
+})()
+
 /* ── Global Scroll-Reveal Observer ── */
 const initScrollReveal = () => {
   const observer = new IntersectionObserver(
