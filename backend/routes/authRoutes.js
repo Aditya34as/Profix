@@ -43,7 +43,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 8);
+    const hashedPassword = await bcrypt.hash(password, 5);
 
     const lng = longitude != null && longitude !== '' ? parseFloat(longitude) : NaN;
     const lat = latitude != null && latitude !== '' ? parseFloat(latitude) : NaN;
