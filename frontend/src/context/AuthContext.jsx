@@ -341,12 +341,14 @@ export const AuthProvider = ({ children }) => {
     });
     const data = await res.json();
     if (data.success) {
+      skipFetchRef.current = true; // profile already in response — skip fetchMe
       localStorage.setItem('profix_token', data.token);
       localStorage.setItem('profix_role', 'shop');
       setToken(data.token);
       setRole('shop');
       setShop(data.shop);
       setUser(null);
+      setLoading(false);
     }
     return data;
   };
@@ -381,12 +383,14 @@ export const AuthProvider = ({ children }) => {
     });
     const data = await res.json();
     if (data.success) {
+      skipFetchRef.current = true; // profile already in response — skip fetchMe
       localStorage.setItem('profix_token', data.token);
       localStorage.setItem('profix_role', 'customer');
       setToken(data.token);
       setRole('customer');
       setUser(data.user);
       setShop(null);
+      setLoading(false);
     }
     return data;
   };

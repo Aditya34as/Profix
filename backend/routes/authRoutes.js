@@ -104,7 +104,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please provide email and password' });
     }
 
-    const shop = await Shop.findOne({ email });
+    const shop = await Shop.findOne({ email }).select('-galleryImages');
     if (!shop) {
       return res.status(401).json({ success: false, error: 'Invalid email or password' });
     }
@@ -116,7 +116,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: shop._id, role: 'shop' }, JWT_SECRET, { expiresIn: '30d' });
 
-    // Return full shop object minus password
+    // Return shop object minus password (galleryImages excluded for speed)
     const shopObj = shop.toObject();
     delete shopObj.password;
 

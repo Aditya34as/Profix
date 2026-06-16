@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: 'This email is already registered as a business account. Please use a different email.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 8);
+    const hashedPassword = await bcrypt.hash(password, 5);
 
     const user = new User({
       name: name.trim(),
@@ -83,7 +83,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('password role name email phone createdAt');
     if (!user) {
       return res.status(401).json({ success: false, error: 'Invalid email or password' });
     }
