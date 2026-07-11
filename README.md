@@ -125,12 +125,12 @@ Make sure you have the following installed:
     ```
     Edit `.env`:
     ```env
-    MONGODB_URI=mongodb://127.0.0.1:27017/profix
+    MONGODB_URI=<YOUR MONGODB URI>
     PORT=5000
     JWT_SECRET=your_jwt_secret_key_here
     ADMIN_KEY=your_admin_key_here
-    ADMIN_EMAIL=admin@profix.com
-    ADMIN_PASSWORD=adminSecurePassword123
+    ADMIN_EMAIL=<ADD ADMIN EMAIL HERE>
+    ADMIN_PASSWORD=<ADD  THE PASSWORD HERE>
     ```
 4.  *(Optional)* **Seed Admin User:**
     Bootstrap the first admin credentials configured in your `.env`:
