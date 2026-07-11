@@ -20,18 +20,18 @@ const MONGODB_URI = process.env.MONGODB_URI;
 async function seedAdmin() {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log('📦 Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Check if admin already exists
     const existing = await User.findOne({ email: ADMIN_EMAIL });
     if (existing) {
       if (existing.role === 'admin') {
-        console.log(`✅ Admin already exists: ${ADMIN_EMAIL}`);
+        console.log(` Admin already exists: ${ADMIN_EMAIL}`);
       } else {
         // Upgrade existing customer to admin
         existing.role = 'admin';
         await existing.save();
-        console.log(`🔄 Upgraded existing user to admin: ${ADMIN_EMAIL}`);
+        console.log(` Upgraded existing user to admin: ${ADMIN_EMAIL}`);
       }
       process.exit(0);
     }
@@ -50,14 +50,14 @@ async function seedAdmin() {
     });
 
     await admin.save();
-    console.log(`\n🎉 Admin user created successfully!`);
+    console.log(`\n Admin user created successfully!`);
     console.log(`   Email:    ${ADMIN_EMAIL}`);
     console.log(`   Password: (as set in .env ADMIN_PASSWORD)`);
     console.log(`\n   Sign in at /auth as "Customer" with these credentials.\n`);
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Seed failed:', error.message);
+    console.error(' Seed failed:', error.message);
     process.exit(1);
   }
 }
